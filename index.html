@@ -232,7 +232,7 @@
   const LOW = 1, HIGH = 100;
   let currentCode = null;
   let myRole = null; // 'a' or 'b'
-  let channel = null;
+  let pollTimer = null;
 
   const screens = {
     landing: document.getElementById('screen-landing'),
@@ -250,7 +250,7 @@
 
   document.querySelectorAll('[data-back]').forEach(el => {
     el.addEventListener('click', () => {
-      unsubscribe();
+      stopPolling();
       show(el.getAttribute('data-back'));
     });
   });
@@ -291,22 +291,19 @@
     return code;
   }
 
-  function unsubscribe(){
-    if (channel){
-      supabase.removeChannel(channel);
-      channel = null;
+  function stopPolling(){
+    if (pollTimer){
+      clearInterval(pollTimer);
+      pollTimer = null;
     }
   }
 
-  function subscribeToGame(code, onChange){
-    unsubscribe();
-    channel = supabase
-      .channel('duel-' + code)
-      .on('postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'duels', filter: `code=eq.${code}` },
-        (payload) => onChange(payload.new.state)
-      )
-      .subscribe();
+  function pollGame(code, onChange){
+    stopPolling();
+    pollTimer = setInterval(async () => {
+      const state = await fetchState(code);
+      if (state) onChange(state);
+    }, 2000);
   }
 
   // ---------- HOST (player A) ----------
@@ -350,7 +347,7 @@
     hostSecretInput.value = '';
 
     show('hostWatch');
-    subscribeToGame(code, (newState) => {
+    pollGame(code, (newState) => {
       if (newState.status === 'playing' || newState.status === 'won'){
         enterDuel(newState);
       }
@@ -452,7 +449,7 @@
     });
 
     if (state.status === 'won'){
-      unsubscribe();
+      stopPolling();
       guessRow.style.display = 'none';
       newDuelBtn.style.display = 'block';
       turnBadge.textContent = 'Duel over';
@@ -497,7 +494,7 @@
   function enterDuel(state){
     show('duel');
     renderDuel(state);
-    subscribeToGame(currentCode, (newState) => renderDuel(newState));
+    pollGame(currentCode, (newState) => renderDuel(newState));
   }
 
   goBtn.addEventListener('click', async () => {
@@ -548,7 +545,7 @@
   });
 
   newDuelBtn.addEventListener('click', () => {
-    unsubscribe();
+    stopPolling();
     currentCode = null;
     myRole = null;
     codeInput.value = '';
