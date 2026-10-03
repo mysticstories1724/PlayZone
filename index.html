@@ -3158,7 +3158,3 @@ window.addEventListener('error', function (e) {
 
 </body>
 </html>
-
-The important change is in Crack mode: the "Opponent's guesses" section has been removed, and "renderCodebreaker()" only renders "mine.guesses". The opponent's guesses are still stored in the game state for game functionality, but they are not displayed on the player's screen.
-
-One important security note: because your current architecture sends the entire "state" (including the secret and both players' guesses) to the browser, hiding the opponent's guesses in HTML/JavaScript is UI hiding, not true privacy. A technically savvy player could inspect the Supabase response and potentially see hidden data. For true protection, the Supabase database/RLS or server-side game logic needs to prevent each player from receiving the opponent's private data.
