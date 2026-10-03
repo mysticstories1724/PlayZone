@@ -404,6 +404,7 @@ input:focus{
 }
 
 @media(max-width:520px){
+
   body{
     padding:12px;
   }
@@ -441,14 +442,19 @@ input:focus{
 <div class="app">
 
   <div class="header">
-    <div class="logo">NUMBER <span>DUEL</span></div>
+
+    <div class="logo">
+      NUMBER <span>DUEL</span>
+    </div>
+
     <div class="subtitle">
       Outsmart your opponent. Crack the code. Win the duel.
     </div>
+
   </div>
 
 
-  <!-- ================= HOME ================= -->
+  <!-- HOME -->
 
   <section id="homeScreen">
 
@@ -540,7 +546,7 @@ input:focus{
   </section>
 
 
-  <!-- ================= WAITING ================= -->
+  <!-- WAITING -->
 
   <section
     id="waitingScreen"
@@ -587,7 +593,7 @@ input:focus{
   </section>
 
 
-  <!-- ================= GAME ================= -->
+  <!-- GAME -->
 
   <section
     id="gameScreen"
@@ -664,9 +670,7 @@ input:focus{
 
       <!-- SECRET -->
 
-      <div
-        id="secretSection"
-      >
+      <div id="secretSection">
 
         <div class="section-title">
           Set Your Secret
@@ -751,9 +755,11 @@ input:focus{
         </div>
 
         <div id="guessHistory">
+
           <div class="small-note">
             Your guesses will appear here.
           </div>
+
         </div>
 
       </div>
@@ -796,8 +802,7 @@ const SUPABASE_URL =
 
 
 /*
-  IMPORTANT:
-  Paste your existing Supabase anon/publishable key here.
+  PASTE YOUR EXISTING SUPABASE ANON/PUBLISHABLE KEY HERE.
 */
 
 const SUPABASE_KEY =
@@ -812,7 +817,7 @@ const supabaseClient =
 
 
 /* =========================================================
-   GLOBAL STATE
+   CONSTANTS / GLOBAL STATE
 ========================================================= */
 
 const TOTAL_ROUNDS = 3;
@@ -841,7 +846,7 @@ const $ = id =>
 
 
 /* =========================================================
-   BASIC HELPERS
+   HELPERS
 ========================================================= */
 
 function escapeHtml(value){
@@ -926,7 +931,7 @@ function showError(
 
 
 /* =========================================================
-   SCREEN CONTROL
+   SCREEN
 ========================================================= */
 
 function showScreen(screen){
@@ -945,7 +950,7 @@ function showScreen(screen){
 
 
 /* =========================================================
-   PLAYER STATE
+   STATE
 ========================================================= */
 
 function playerState(){
@@ -1045,7 +1050,7 @@ function generateRoomCode(){
 
   let code = "";
 
-  for(let i = 0; i < 6; i++){
+  for(let i=0;i<6;i++){
 
     code +=
       chars[
@@ -1066,7 +1071,8 @@ function generateRoomCode(){
 
 function setMode(mode){
 
-  selectedMode = mode;
+  selectedMode =
+    mode;
 
   $("duelModeBtn")
     .classList.toggle(
@@ -1117,7 +1123,8 @@ async function createRoom(){
   }
 
 
-  button.disabled = true;
+  button.disabled =
+    true;
 
   button.textContent =
     "Creating…";
@@ -1153,15 +1160,11 @@ async function createRoom(){
         .single();
 
 
-    /*
-      If the random room code collides,
-      retry once with another code.
-    */
-
     if(
       result.error &&
       (
-        result.error.code === "23505" ||
+        result.error.code ===
+          "23505" ||
         result.error.message
           ?.toLowerCase()
           .includes("duplicate")
@@ -1207,12 +1210,6 @@ async function createRoom(){
         result.data.state
       );
 
-
-    /*
-      IMPORTANT:
-      Always clear old game results
-      when entering a newly-created room.
-    */
 
     clearGameDisplay();
 
@@ -1276,7 +1273,7 @@ async function joinRoom(){
     $("joinRoomBtn");
 
 
-  let code =
+  const code =
     $("joinCodeInput")
       .value
       .trim()
@@ -1295,7 +1292,8 @@ async function joinRoom(){
   }
 
 
-  button.disabled = true;
+  button.disabled =
+    true;
 
   button.textContent =
     "Joining…";
@@ -1344,22 +1342,12 @@ async function joinRoom(){
     }
 
 
-    /*
-      Join using the latest state
-      we just fetched.
-    */
-
     currentState.b.joined =
       true;
 
     currentState.status =
       "playing";
 
-
-    /*
-      Clear any old UI before entering
-      this room.
-    */
 
     clearGameDisplay();
 
@@ -1426,16 +1414,15 @@ async function joinRoom(){
 
 
 /* =========================================================
-   CLEAR OLD GAME UI
+   CLEAR OLD ROOM UI
 ========================================================= */
 
 function clearGameDisplay(){
 
   /*
-    THIS IS THE IMPORTANT ROOM RESET.
-
-    Old winning information must never
-    carry into a different room.
+    This prevents a previous/disconnected
+    room's winner information from staying
+    on screen.
   */
 
   $("roundResult")
@@ -1458,33 +1445,17 @@ function clearGameDisplay(){
     .innerHTML = "";
 
 
+  $("guessInput")
+    .value = "";
+
+
+  $("secretInput")
+    .value = "";
+
+
   clearError(
     $("guessError")
   );
-
-
-  $("guessInput")
-    .value = "";
-
-
-  $("secretInput")
-    .value = "";
-
-
-  $("guessInput")
-    .disabled = false;
-
-
-  $("guessBtn")
-    .disabled = false;
-
-
-  $("secretInput")
-    .disabled = false;
-
-
-  $("setSecretBtn")
-    .disabled = false;
 
 
   $("historySection")
@@ -1505,7 +1476,8 @@ function subscribeToRoom(){
         realtimeChannel
       );
 
-    realtimeChannel = null;
+    realtimeChannel =
+      null;
   }
 
 
@@ -1542,20 +1514,14 @@ function subscribeToRoom(){
               );
 
 
-            /*
-              Ignore stale result UI
-              from another room.
-            */
-
-            $("gameRoomCode")
-              .textContent =
-              roomCode;
-
-
             if(
               currentState.status ===
               "playing"
             ){
+
+              $("gameRoomCode")
+                .textContent =
+                roomCode;
 
               showScreen(
                 $("gameScreen")
@@ -1575,7 +1541,7 @@ function subscribeToRoom(){
 
 
 /* =========================================================
-   FETCH LATEST STATE
+   FETCH LATEST
 ========================================================= */
 
 async function fetchLatestState(){
@@ -1596,10 +1562,12 @@ async function fetchLatestState(){
     throw result.error;
 
 
-  if(!result.data?.state)
+  if(!result.data?.state){
+
     throw new Error(
       "Room state is missing."
     );
+  }
 
 
   return normalizeState(
@@ -1609,7 +1577,7 @@ async function fetchLatestState(){
 
 
 /* =========================================================
-   SAVE STATE
+   SAVE
 ========================================================= */
 
 async function saveState(){
@@ -1646,25 +1614,16 @@ function renderWaiting(){
     roomCode;
 
 
-  if(
+  $("waitingStatus")
+    .textContent =
     currentState?.b?.joined
-  ){
-
-    $("waitingStatus")
-      .textContent =
-      "Opponent joined. Starting…";
-
-  }else{
-
-    $("waitingStatus")
-      .textContent =
-      "Waiting for opponent…";
-  }
+      ? "Opponent joined. Starting…"
+      : "Waiting for opponent…";
 }
 
 
 /* =========================================================
-   SECRET VALIDATION
+   VALIDATION
 ========================================================= */
 
 function validateDuelSecret(value){
@@ -1687,17 +1646,23 @@ function validateDuelSecret(value){
 }
 
 
+/*
+  CRACK SECRET:
+
+  Repeated digits ARE ALLOWED.
+
+  4444 ✅
+  1111 ✅
+  1212 ✅
+  1122 ✅
+  9999 ✅
+*/
+
 function validateCrackCode(value){
 
   if(!/^\d{4}$/.test(value)){
 
     return "Enter exactly 4 digits.";
-  }
-
-
-  if(new Set(value).size !== 4){
-
-    return "All 4 digits must be unique.";
   }
 
 
@@ -1725,17 +1690,21 @@ function validateDuelGuess(value){
 }
 
 
+/*
+  CRACK GUESS:
+
+  Repeated digits ARE ALSO ALLOWED.
+
+  4444 ✅
+  7777 ✅
+  1212 ✅
+*/
+
 function validateCrackGuess(value){
 
   if(!/^\d{4}$/.test(value)){
 
     return "Enter exactly 4 digits.";
-  }
-
-
-  if(new Set(value).size !== 4){
-
-    return "All 4 digits must be unique.";
   }
 
 
@@ -1754,19 +1723,12 @@ async function setSecret(){
   );
 
 
-  clearError(
-    $("secretMessage")
-  );
-
-
   try{
 
     /*
-      IMPORTANT:
-      Always fetch the latest state first.
-
-      This prevents Player 1 and Player 2
-      from overwriting each other's secret.
+      Always get latest state first
+      so neither player's secret gets
+      overwritten.
     */
 
     const latest =
@@ -1844,10 +1806,6 @@ async function setSecret(){
       true;
 
 
-    /*
-      Both players ready?
-    */
-
     if(
       currentState.a.secretSet &&
       currentState.b.secretSet
@@ -1875,7 +1833,13 @@ async function setSecret(){
     $("secretMessage")
       .innerHTML = `
         <div class="success-box">
-          ✓ Secret locked. Waiting for opponent…
+          ✓ Your secret is locked.
+          ${
+            currentState.a.secretSet &&
+            currentState.b.secretSet
+              ? " Game starting…"
+              : " Waiting for opponent…"
+          }
         </div>
       `;
 
@@ -1901,7 +1865,7 @@ async function setSecret(){
 
 
 /* =========================================================
-   SCORE
+   POINTS
 ========================================================= */
 
 function pointsForGuess(
@@ -1920,7 +1884,7 @@ function pointsForGuess(
 
 
 /* =========================================================
-   CRACK SCORING
+   CRACK FEEDBACK
 ========================================================= */
 
 function scoreCrack(
@@ -1934,6 +1898,23 @@ function scoreCrack(
 
   const details = [];
 
+
+  /*
+    This handles repeated digits correctly.
+
+    Example:
+
+    Secret: 4444
+    Guess : 4444
+
+    All four = correct position.
+
+    Secret: 4444
+    Guess : 4441
+
+    First three = correct position.
+    Last 1 = not in code.
+  */
 
   for(
     let i = 0;
@@ -1952,7 +1933,6 @@ function scoreCrack(
 
       bulls++;
 
-
       details.push({
 
         digit,
@@ -1970,7 +1950,6 @@ function scoreCrack(
     ){
 
       cows++;
-
 
       details.push({
 
@@ -2027,10 +2006,8 @@ async function makeGuess(){
   try{
 
     /*
-      CRITICAL MULTIPLAYER FIX:
-
-      Get the latest database state BEFORE
-      checking whose turn it is.
+      Always fetch newest state before
+      making a guess.
     */
 
     const latest =
@@ -2058,12 +2035,11 @@ async function makeGuess(){
       myRole
     ){
 
-      $("guessError")
-        .innerHTML = `
-          <div class="error-box">
-            ⏳ It is not your turn.
-          </div>
-        `;
+      showError(
+        $("guessError"),
+        "Wait for your turn.",
+        "Not Your Turn"
+      );
 
       return;
     }
@@ -2093,11 +2069,9 @@ async function makeGuess(){
       ];
 
 
-    /*
-      ==========================
-      DUEL
-      ==========================
-    */
+    /* ==========================
+       DUEL
+    ========================== */
 
     if(
       currentState.mode ===
@@ -2126,15 +2100,12 @@ async function makeGuess(){
         Number(value);
 
 
-      /*
-        Prevent duplicate guesses
-      */
-
       if(
         mine.guesses.some(
           guess =>
-            Number(guess.value) ===
-            number
+            Number(
+              guess.value
+            ) === number
         )
       ){
 
@@ -2157,7 +2128,9 @@ async function makeGuess(){
 
       if(
         number ===
-        Number(opponent.secret)
+        Number(
+          opponent.secret
+        )
       ){
 
         const points =
@@ -2181,7 +2154,6 @@ async function makeGuess(){
         currentState.roundFinished =
           true;
 
-
       }else{
 
         currentState.turn =
@@ -2189,11 +2161,9 @@ async function makeGuess(){
       }
 
 
-    /*
-      ==========================
-      CRACK
-      ==========================
-    */
+    /* ==========================
+       CRACK
+    ========================== */
 
     }else{
 
@@ -2241,13 +2211,11 @@ async function makeGuess(){
 
 
       /*
-        IMPORTANT:
-
         Only OUR guesses are stored
-        in our history display.
+        and displayed.
 
         Opponent guesses are never
-        rendered in the UI.
+        displayed to us.
       */
 
       mine.guesses.push({
@@ -2276,14 +2244,6 @@ async function makeGuess(){
           );
 
 
-        /*
-          Keep scoring internally for
-          the 3-round total.
-
-          We simply DON'T display these
-          points in Crack round-result.
-        */
-
         mine.roundPoints =
           points;
 
@@ -2298,7 +2258,6 @@ async function makeGuess(){
 
         currentState.roundFinished =
           true;
-
 
       }else{
 
@@ -2607,7 +2566,7 @@ function renderCrackHistory(
 
 
 /* =========================================================
-   HISTORY ROUTER
+   HISTORY
 ========================================================= */
 
 function renderHistory(){
@@ -2664,25 +2623,17 @@ function renderRoundResult(){
     return;
 
 
-  const winnerPlayer =
-    currentState[
-      winner
-    ];
-
-
   const isMe =
     winner ===
     myRole;
 
 
   /*
-    ==========================
-    CRACK MODE
-    ==========================
+    CRACK:
 
-    NO points earned text.
-
-    History stays visible.
+    Keep history.
+    Do not show Duel-style
+    "100 points earned".
   */
 
   if(
@@ -2714,12 +2665,16 @@ function renderRoundResult(){
 
 
   /*
-    ==========================
-    DUEL MODE
-    ==========================
+    DUEL:
 
-    Points remain visible.
+    Show round points.
   */
+
+  const winnerPlayer =
+    currentState[
+      winner
+    ];
+
 
   $("roundResult")
     .innerHTML = `
@@ -2770,17 +2725,17 @@ function renderFinal(){
     .innerHTML = "";
 
 
-  /*
-    IMPORTANT:
-    Keep the user's history visible
-    even on the final screen.
-  */
-
   $("historySection")
     .classList.remove("hidden");
 
 
   renderHistory();
+
+
+  const opponentRole =
+    myRole === "a"
+      ? "b"
+      : "a";
 
 
   if(
@@ -2814,9 +2769,7 @@ function renderFinal(){
             <strong>
               ${
                 currentState[
-                  myRole === "a"
-                    ? "b"
-                    : "a"
+                  opponentRole
                 ].totalPoints
               }
             </strong>
@@ -2869,9 +2822,7 @@ function renderFinal(){
           <strong>
             ${
               currentState[
-                myRole === "a"
-                  ? "b"
-                  : "a"
+                opponentRole
               ].totalPoints
             }
           </strong>
@@ -2924,11 +2875,6 @@ async function startNextRound(){
 
   try{
 
-    /*
-      Fetch latest state before
-      changing the round.
-    */
-
     const latest =
       await fetchLatestState();
 
@@ -2936,11 +2882,6 @@ async function startNextRound(){
     currentState =
       latest;
 
-
-    /*
-      Someone else may already have
-      moved the game forward.
-    */
 
     if(
       !currentState.roundFinished
@@ -2951,10 +2892,6 @@ async function startNextRound(){
       return;
     }
 
-
-    /*
-      Final round finished.
-    */
 
     if(
       currentState.round >=
@@ -2998,16 +2935,16 @@ async function startNextRound(){
 
       await saveState();
 
+
       renderGame();
+
 
       return;
     }
 
 
     /*
-      ==========================
-      START NEXT ROUND
-      ==========================
+      NEXT ROUND
     */
 
     currentState.round += 1;
@@ -3021,12 +2958,6 @@ async function startNextRound(){
     currentState.turn =
       "a";
 
-
-    /*
-      Reset round-only data.
-
-      Total points remain.
-    */
 
     currentState.a.secret =
       null;
@@ -3059,9 +2990,7 @@ async function startNextRound(){
 
 
     /*
-      IMPORTANT:
-      Clear the old round result
-      before rendering the new round.
+      Clear previous round result.
     */
 
     $("roundResult")
@@ -3088,6 +3017,14 @@ async function startNextRound(){
       .value = "";
 
 
+    $("secretInput")
+      .disabled = false;
+
+
+    $("setSecretBtn")
+      .disabled = false;
+
+
     await saveState();
 
 
@@ -3112,7 +3049,7 @@ async function startNextRound(){
 
 
 /* =========================================================
-   MAIN GAME RENDER
+   MAIN RENDER
 ========================================================= */
 
 function renderGame(){
@@ -3125,21 +3062,6 @@ function renderGame(){
     normalizeState(
       currentState
     );
-
-
-  /*
-    IMPORTANT:
-
-    DO NOT blindly clear roundResult here.
-
-    If we clear it every render,
-    a legitimate current-room win
-    disappears immediately.
-
-    Old results are cleared only:
-    - when creating/joining a room
-    - when starting a new round
-  */
 
 
   $("gameRoomCode")
@@ -3181,22 +3103,12 @@ function renderGame(){
 
 
   /*
-    ==========================
-    FINAL
-    ==========================
+    FINAL GAME
   */
 
   if(
     currentState.winner
   ){
-
-    $("secretSection")
-      .classList.add("hidden");
-
-
-    $("guessSection")
-      .classList.add("hidden");
-
 
     renderFinal();
 
@@ -3205,9 +3117,9 @@ function renderGame(){
 
 
   /*
-    ==========================
-    ROUND FINISHED
-    ==========================
+    CURRENT ROUND FINISHED
+
+    Keep the current-room result.
   */
 
   if(
@@ -3222,31 +3134,22 @@ function renderGame(){
       .classList.add("hidden");
 
 
-    /*
-      Keep history visible.
-    */
-
     $("historySection")
       .classList.remove("hidden");
 
 
     renderHistory();
 
-
     renderRoundResult();
 
-
     scheduleNextRound();
-
 
     return;
   }
 
 
   /*
-    ==========================
-    WAITING FOR BOTH SECRETS
-    ==========================
+    WAITING FOR SECRETS
   */
 
   if(
@@ -3273,7 +3176,7 @@ function renderGame(){
       .textContent =
       currentState.mode === "duel"
         ? "Choose your secret number (1–100)."
-        : "Choose a 4-digit code with 4 unique digits.";
+        : "Choose any 4-digit secret code. Repeated digits are allowed.";
 
 
     if(mine.secretSet){
@@ -3319,9 +3222,7 @@ function renderGame(){
 
 
   /*
-    ==========================
     BOTH SECRETS READY
-    ==========================
   */
 
   $("secretSection")
@@ -3343,13 +3244,11 @@ function renderGame(){
     .textContent =
     currentState.mode === "duel"
       ? "Guess opponent's number (1–100)."
-      : "Crack opponent's 4-digit code.";
+      : "Crack opponent's 4-digit code. Repeated digits are allowed.";
 
 
   /*
-    ==========================
     TURN
-    ==========================
   */
 
   if(
@@ -3413,14 +3312,6 @@ async function leaveGame(){
   }
 
 
-  /*
-    Clear EVERYTHING from the old room.
-
-    This is what prevents old winner
-    information from appearing in a
-    new room.
-  */
-
   roomCode =
     null;
 
@@ -3430,6 +3321,10 @@ async function leaveGame(){
   currentState =
     null;
 
+
+  /*
+    Clear ALL old room results.
+  */
 
   $("roundResult")
     .innerHTML = "";
@@ -3459,24 +3354,22 @@ async function leaveGame(){
     .value = "";
 
 
-  $("gameStatus")
-    .textContent =
-    "Loading…";
-
-
   $("myScore")
-    .textContent =
-    "0";
+    .textContent = "0";
 
 
   $("opponentScore")
-    .textContent =
-    "0";
+    .textContent = "0";
 
 
   $("roundNumber")
     .textContent =
     "Round 1 / 3";
+
+
+  $("gameStatus")
+    .textContent =
+    "Loading…";
 
 
   $("joinCodeInput")
@@ -3503,7 +3396,7 @@ async function leaveGame(){
 
 
 /* =========================================================
-   BUTTON EVENTS
+   EVENTS
 ========================================================= */
 
 $("duelModeBtn")
@@ -3536,6 +3429,7 @@ $("showJoinBtn")
         .classList.toggle(
           "hidden"
         );
+
 
       if(
         !$("joinCard")
@@ -3587,7 +3481,7 @@ $("leaveGameBtn")
 
 
 /* =========================================================
-   ENTER KEY SUPPORT
+   ENTER KEY
 ========================================================= */
 
 $("joinCodeInput")
@@ -3596,8 +3490,7 @@ $("joinCodeInput")
     event => {
 
       if(
-        event.key ===
-        "Enter"
+        event.key === "Enter"
       ){
 
         joinRoom();
@@ -3612,8 +3505,7 @@ $("secretInput")
     event => {
 
       if(
-        event.key ===
-        "Enter"
+        event.key === "Enter"
       ){
 
         setSecret();
@@ -3628,8 +3520,7 @@ $("guessInput")
     event => {
 
       if(
-        event.key ===
-        "Enter"
+        event.key === "Enter"
       ){
 
         makeGuess();
@@ -3660,7 +3551,7 @@ $("joinCodeInput")
 
 
 /* =========================================================
-   INITIAL UI
+   START
 ========================================================= */
 
 setMode("duel");
