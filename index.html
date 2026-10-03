@@ -157,7 +157,7 @@
     <h1>Pick your secret</h1>
     <p class="sub">Choose a whole number from 1 to 100. Your opponent will only get higher / lower hints.</p>
     <div class="field">
-      <label for="hostSecretInput">Your secret number (1–100)</label>
+      <label for="hostSecretInput">Your secret number (1-100)</label>
       <input type="number" id="hostSecretInput" min="1" max="100" placeholder="e.g. 42">
     </div>
     <div class="error-text" id="hostError"></div>
@@ -173,7 +173,7 @@
         <div class="label">GAME CODE</div>
         <div class="code" id="hostCodeDisplay">0000</div>
       </div>
-      <div class="status-line" id="hostWaitStatus">Waiting for your opponent to join…</div>
+      <div class="status-line" id="hostWaitStatus">Waiting for your opponent to join...</div>
     </div>
   </div>
 ​
@@ -195,7 +195,7 @@
     <h1>Pick your secret</h1>
     <p class="sub">Choose your own secret number from 1 to 100. Your opponent will try to guess it too.</p>
     <div class="field">
-      <label for="joinSecretInput">Your secret number (1–100)</label>
+      <label for="joinSecretInput">Your secret number (1-100)</label>
       <input type="number" id="joinSecretInput" min="1" max="100" placeholder="e.g. 17">
     </div>
     <div class="error-text" id="joinSecretError"></div>
@@ -205,7 +205,7 @@
   <!-- DUEL PLAY -->
   <div class="screen" id="screen-duel">
     <h1>Number duel</h1>
-    <div class="turn-row"><span class="turn-badge" id="turnBadge">Checking turn…</span></div>
+    <div class="turn-row"><span class="turn-badge" id="turnBadge">Checking turn...</span></div>
 ​
     <div class="range-row">
       <span id="lowBound">1</span>
@@ -215,7 +215,7 @@
     <div class="card">
       <div class="reading">
         <div class="number" id="numberDisplay">?</div>
-        <div class="feedback" id="feedback">Waiting…</div>
+        <div class="feedback" id="feedback">Waiting...</div>
       </div>
       <div class="tries" id="guessHistory"></div>
     </div>
@@ -233,7 +233,7 @@
   <div class="screen" id="screen-cb-landing">
     <span class="back-link" data-back="mode">&larr; back</span>
     <h1>Crack the code</h1>
-    <p class="sub">The system picks a secret 4-digit code (no repeated digits). Take turns guessing — you'll see how many digits are right, and how many are in the exact spot.</p>
+    <p class="sub">The system picks a secret 4-digit code (no repeated digits). Take turns guessing  -  you'll see how many digits are right, and how many are in the exact spot.</p>
     <div class="choice-row">
       <button class="choice-btn" id="cbToHost"><span class="big">Start</span>Create a room</button>
       <button class="choice-btn" id="cbToJoin"><span class="big">Join</span>Enter a code</button>
@@ -249,7 +249,7 @@
         <div class="label">ROOM CODE</div>
         <div class="code" id="cbHostCodeDisplay">0000</div>
       </div>
-      <div class="status-line" id="cbHostWaitStatus">Waiting for your opponent to join…</div>
+      <div class="status-line" id="cbHostWaitStatus">Waiting for your opponent to join...</div>
     </div>
   </div>
 ​
@@ -269,12 +269,12 @@
   <!-- CODEBREAKER PLAY -->
   <div class="screen" id="screen-cb-play">
     <h1>Crack the code</h1>
-    <div class="turn-row"><span class="turn-badge" id="cbTurnBadge">Checking turn…</span></div>
+    <div class="turn-row"><span class="turn-badge" id="cbTurnBadge">Checking turn...</span></div>
 ​
     <div class="card">
       <div class="reading">
         <div class="number" id="cbNumberDisplay">????</div>
-        <div class="feedback" id="cbFeedback">Waiting…</div>
+        <div class="feedback" id="cbFeedback">Waiting...</div>
       </div>
     </div>
 ​
@@ -319,7 +319,7 @@ window.addEventListener('error', function(e){
   // ---------------------------------------------------------------
 ​
   // Set up Supabase without letting a failure here block the rest of the
-  // page — navigation between screens should still work even if the
+  // page  -  navigation between screens should still work even if the
   // backend can't be reached, and we show a clear message instead.
   let supabase = null;
   let supabaseError = null;
@@ -363,7 +363,7 @@ window.addEventListener('error', function(e){
     const banner = document.createElement('div');
     banner.className = 'setup-missing';
     banner.style.marginBottom = '20px';
-    banner.innerHTML = '<strong>Heads up —</strong><br><br>' + supabaseError +
+    banner.innerHTML = '<strong>Heads up  - </strong><br><br>' + supabaseError +
       '<br><br>You can still browse the screens, but creating or joining a game won\u2019t work until this is fixed.';
     document.getElementById('app').insertBefore(banner, document.getElementById('app').firstChild);
   }
@@ -458,7 +458,7 @@ window.addEventListener('error', function(e){
     }
     hostError.textContent = '';
     createGameBtn.disabled = true;
-    createGameBtn.textContent = 'Creating…';
+    createGameBtn.textContent = 'Creating...';
 ​
     const code = await generateUniqueCode();
     const state = {
@@ -481,7 +481,7 @@ window.addEventListener('error', function(e){
     currentCode = code;
     myRole = 'a';
     hostCodeDisplay.textContent = code;
-    hostWaitStatus.textContent = 'Waiting for your opponent to join…';
+    hostWaitStatus.textContent = 'Waiting for your opponent to join...';
     hostSecretInput.value = '';
 ​
     show('hostWatch');
@@ -508,7 +508,7 @@ window.addEventListener('error', function(e){
       return;
     }
     checkCodeBtn.disabled = true;
-    checkCodeBtn.textContent = 'Checking…';
+    checkCodeBtn.textContent = 'Checking...';
     const state = await fetchState(code);
     checkCodeBtn.disabled = false;
     checkCodeBtn.textContent = 'Continue';
@@ -538,7 +538,7 @@ window.addEventListener('error', function(e){
     }
     joinSecretError.textContent = '';
     startDuelBtn.disabled = true;
-    startDuelBtn.textContent = 'Starting…';
+    startDuelBtn.textContent = 'Starting...';
 ​
     const state = await fetchState(pendingCode);
     if (!state || state.status !== 'waiting_for_join'){
@@ -627,7 +627,7 @@ window.addEventListener('error', function(e){
       turnBadge.className = 'turn-badge';
       numberDisplay.textContent = mine.guesses.length ? mine.guesses[mine.guesses.length - 1].value : '?';
       numberDisplay.className = 'number';
-      feedback.textContent = 'Waiting for your opponent to guess…';
+      feedback.textContent = 'Waiting for your opponent to guess...';
       guessInput.disabled = true;
       goBtn.disabled = true;
     }
@@ -756,7 +756,7 @@ window.addEventListener('error', function(e){
     currentCode = code;
     myRole = 'a';
     cbHostCodeDisplay.textContent = code;
-    cbHostWaitStatus.textContent = 'Waiting for your opponent to join…';
+    cbHostWaitStatus.textContent = 'Waiting for your opponent to join...';
 ​
     show('cbHostWatch');
     pollGame(code, (newState) => {
@@ -775,7 +775,7 @@ window.addEventListener('error', function(e){
       return;
     }
     cbJoinBtn.disabled = true;
-    cbJoinBtn.textContent = 'Joining…';
+    cbJoinBtn.textContent = 'Joining...';
     const state = await fetchState(code);
     cbJoinBtn.disabled = false;
     cbJoinBtn.textContent = 'Join room';
@@ -820,7 +820,7 @@ window.addEventListener('error', function(e){
       codeSpan.textContent = g.value;
       const fbSpan = document.createElement('span');
       fbSpan.className = 'fb';
-      fbSpan.textContent = `${g.bulls} right spot · ${g.cows} right digit`;
+      fbSpan.textContent = `${g.bulls} right spot - ${g.cows} right digit`;
       row.appendChild(codeSpan);
       row.appendChild(fbSpan);
       container.appendChild(row);
@@ -869,7 +869,7 @@ window.addEventListener('error', function(e){
     } else {
       cbTurnBadge.textContent = "Opponent's turn";
       cbTurnBadge.className = 'turn-badge';
-      cbFeedback.textContent = 'Waiting for your opponent to guess…';
+      cbFeedback.textContent = 'Waiting for your opponent to guess...';
       cbGuessInput.disabled = true;
       cbGoBtn.disabled = true;
     }
