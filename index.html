@@ -1,1603 +1,1896 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Number Duel</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Inter, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top, #182447 0%, #080b16 45%, #05060b 100%);
-      color: #fff;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    button,
-    input {
-      font: inherit;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 900px;
-      margin: auto;
-    }
-
-    .screen {
-      display: none;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
-    .hero {
-      text-align: center;
-      padding: 35px 15px 25px;
-    }
-
-    .logo {
-      font-size: clamp(38px, 8vw, 70px);
-      font-weight: 900;
-      letter-spacing: -3px;
-    }
-
-    .subtitle {
-      margin-top: 10px;
-      color: #aeb7d0;
-      font-size: 15px;
-    }
-
-    .card {
-      background: rgba(18, 24, 45, 0.9);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 22px;
-      padding: 24px;
-      margin-bottom: 18px;
-      box-shadow: 0 15px 45px rgba(0,0,0,.25);
-    }
-
-    .mode-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .mode-btn {
-      min-height: 120px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: #11172b;
-      color: white;
-      border-radius: 18px;
-      cursor: pointer;
-      padding: 20px;
-      transition: .2s;
-    }
-
-    .mode-btn:hover {
-      transform: translateY(-2px);
-      border-color: #6e7cff;
-    }
-
-    .mode-btn.selected {
-      background: #202957;
-      border-color: #7885ff;
-      box-shadow: 0 0 0 2px rgba(120,133,255,.18);
-    }
-
-    .mode-icon {
-      font-size: 34px;
-      margin-bottom: 8px;
-    }
-
-    .mode-title {
-      font-size: 19px;
-      font-weight: 800;
-    }
-
-    .mode-description {
-      color: #9ca6c0;
-      font-size: 13px;
-      margin-top: 5px;
-    }
-
-    .button-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    button.primary,
-    button.secondary {
-      border: none;
-      border-radius: 14px;
-      padding: 14px 18px;
-      cursor: pointer;
-      font-weight: 800;
-      transition: .2s;
-    }
-
-    button.primary {
-      background: #6675ff;
-      color: white;
-    }
-
-    button.primary:hover {
-      background: #7885ff;
-      transform: translateY(-1px);
-    }
-
-    button.secondary {
-      background: #252c45;
-      color: white;
-    }
-
-    button.secondary:hover {
-      background: #303953;
-    }
-
-    button:disabled {
-      opacity: .45;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    input {
-      width: 100%;
-      background: #0b1020;
-      border: 1px solid #303955;
-      color: white;
-      border-radius: 13px;
-      padding: 14px;
-      outline: none;
-      margin-top: 8px;
-    }
-
-    input:focus {
-      border-color: #7280ff;
-    }
-
-    label {
-      color: #c4cbe0;
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .room-actions {
-      display: grid;
-      gap: 12px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .error-box {
-      background: rgba(220, 50, 70, .12);
-      border: 1px solid rgba(255, 80, 100, .4);
-      color: #ffb5be;
-      border-radius: 14px;
-      padding: 14px;
-      margin-top: 15px;
-      line-height: 1.5;
-      font-size: 13px;
-      word-break: break-word;
-    }
-
-    .error-title {
-      font-weight: 900;
-      color: #ff7d8c;
-      margin-bottom: 5px;
-    }
-
-    .success-box {
-      background: rgba(50, 200, 120, .1);
-      border: 1px solid rgba(50, 200, 120, .3);
-      color: #9ff0c4;
-      border-radius: 14px;
-      padding: 14px;
-      margin-top: 15px;
-    }
-
-    .room-code {
-      font-size: 35px;
-      font-weight: 900;
-      letter-spacing: 8px;
-      text-align: center;
-      padding: 15px;
-      background: #0a0f1e;
-      border-radius: 15px;
-      margin: 12px 0;
-    }
-
-    .room-info {
-      text-align: center;
-      color: #9ca6c0;
-      font-size: 13px;
-    }
-
-    .game-header {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .player-score {
-      background: #11172b;
-      border-radius: 17px;
-      padding: 15px;
-      border: 1px solid rgba(255,255,255,.06);
-    }
-
-    .player-score.right {
-      text-align: right;
-    }
-
-    .player-name {
-      color: #9fa9c3;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .score {
-      font-size: 30px;
-      font-weight: 900;
-      margin-top: 3px;
-    }
-
-    .round-label {
-      text-align: center;
-      background: #202750;
-      border-radius: 14px;
-      padding: 10px 15px;
-      min-width: 100px;
-    }
-
-    .round-small {
-      font-size: 11px;
-      color: #aab3cf;
-    }
-
-    .round-number {
-      font-size: 20px;
-      font-weight: 900;
-    }
-
-    .status {
-      text-align: center;
-      font-size: 18px;
-      font-weight: 800;
-      margin-bottom: 18px;
-    }
-
-    .secret-box {
-      text-align: center;
-      background: #0a0f1e;
-      border-radius: 17px;
-      padding: 20px;
-      margin-top: 15px;
-    }
-
-    .secret-title {
-      color: #aab3ca;
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
-
-    .secret-set {
-      font-size: 25px;
-      font-weight: 900;
-      color: #73e3a8;
-    }
-
-    .guess-form {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .guess-form input {
-      margin: 0;
-    }
-
-    .guess-form button {
-      min-width: 120px;
-    }
-
-    .history {
-      margin-top: 20px;
-    }
-
-    .history-title {
-      color: #aab3ca;
-      font-size: 13px;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .guess-item {
-      background: #0c1222;
-      border: 1px solid rgba(255,255,255,.06);
-      border-radius: 13px;
-      padding: 12px;
-      margin-bottom: 8px;
-    }
-
-    .guess-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      font-weight: 800;
-    }
-
-    .guess-result {
-      margin-top: 4px;
-      color: #aab3ca;
-      font-size: 13px;
-    }
-
-    .feedback-list {
-      display: grid;
-      gap: 7px;
-      margin-top: 9px;
-    }
-
-    .feedback-digit {
-      padding: 8px 10px;
-      border-radius: 9px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .correct-position {
-      background: rgba(60, 210, 130, .12);
-      color: #82eeb1;
-    }
-
-    .wrong-position {
-      background: rgba(245, 190, 60, .12);
-      color: #ffd36b;
-    }
-
-    .not-found {
-      background: rgba(255, 80, 90, .1);
-      color: #ff9ca5;
-    }
-
-    .result-box {
-      text-align: center;
-      padding: 25px;
-      border-radius: 18px;
-      background: #151c35;
-      margin-top: 18px;
-    }
-
-    .result-title {
-      font-size: 25px;
-      font-weight: 900;
-    }
-
-    .result-points {
-      color: #aeb7d0;
-      margin-top: 8px;
-    }
-
-    .winner-box {
-      text-align: center;
-      background: #171e38;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 20px;
-      padding: 30px 20px;
-      margin-top: 18px;
-    }
-
-    .winner-title {
-      font-size: 30px;
-      font-weight: 900;
-    }
-
-    .winner-score {
-      font-size: 40px;
-      font-weight: 900;
-      margin-top: 8px;
-    }
-
-    .small-note {
-      color: #8f99b4;
-      font-size: 12px;
-      line-height: 1.5;
-      margin-top: 10px;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 15px;
-      color: #aeb7d0;
-    }
-
-    @media (max-width: 650px) {
-      .mode-grid,
-      .button-row {
-        grid-template-columns: 1fr;
-      }
-
-      .game-header {
-        grid-template-columns: 1fr;
-      }
-
-      .player-score,
-      .player-score.right {
-        text-align: center;
-      }
-
-      .guess-form {
-        flex-direction: column;
-      }
-
-      .guess-form button {
-        width: 100%;
-      }
-
-      .room-code {
-        font-size: 28px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070a14">
+
+<title>Number Duel</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  background:#070a14;
+}
+
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% -10%,#202d61 0%,#0d1225 38%,#070a14 72%);
+  color:#fff;
+  padding:16px;
+}
+
+button,input{
+  font:inherit;
+}
+
+button{
+  -webkit-tap-highlight-color:transparent;
+}
+
+.app{
+  width:100%;
+  max-width:880px;
+  margin:auto;
+}
+
+.screen{
+  display:none;
+}
+
+.screen.active{
+  display:block;
+}
+
+.hero{
+  text-align:center;
+  padding:30px 10px 22px;
+}
+
+.logo{
+  font-size:clamp(38px,8vw,68px);
+  font-weight:950;
+  line-height:1;
+  letter-spacing:-3px;
+}
+
+.subtitle{
+  margin-top:11px;
+  color:#9ca8c7;
+  font-size:14px;
+}
+
+.card{
+  background:rgba(15,21,40,.92);
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:22px;
+  padding:20px;
+  margin-bottom:15px;
+  box-shadow:0 15px 50px rgba(0,0,0,.24);
+}
+
+.mode-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.mode-btn{
+  border:1px solid #252d48;
+  background:#0c1224;
+  color:#fff;
+  border-radius:17px;
+  min-height:115px;
+  padding:18px;
+  cursor:pointer;
+  text-align:left;
+  transition:.16s ease;
+}
+
+.mode-btn:active{
+  transform:scale(.985);
+}
+
+.mode-btn.selected{
+  border-color:#7481ff;
+  background:linear-gradient(145deg,#202a58,#151d3d);
+  box-shadow:0 0 0 2px rgba(116,129,255,.13);
+}
+
+.mode-icon{
+  font-size:29px;
+  margin-bottom:7px;
+}
+
+.mode-title{
+  font-size:18px;
+  font-weight:850;
+}
+
+.mode-description{
+  color:#8e99b7;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.button-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+button.primary,
+button.secondary{
+  border:0;
+  border-radius:13px;
+  padding:14px 17px;
+  font-weight:850;
+  cursor:pointer;
+  transition:.15s ease;
+}
+
+button.primary{
+  color:#fff;
+  background:#6574ff;
+}
+
+button.primary:hover{
+  background:#7482ff;
+}
+
+button.secondary{
+  color:#fff;
+  background:#242c45;
+}
+
+button.secondary:hover{
+  background:#303953;
+}
+
+button:active{
+  transform:scale(.985);
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  transform:none!important;
+}
+
+input{
+  width:100%;
+  border:1px solid #2d3653;
+  border-radius:12px;
+  background:#080d1b;
+  color:#fff;
+  padding:13px 14px;
+  outline:none;
+  margin-top:7px;
+}
+
+input:focus{
+  border-color:#7080ff;
+  box-shadow:0 0 0 3px rgba(112,128,255,.08);
+}
+
+label{
+  display:block;
+  color:#bdc6dd;
+  font-size:13px;
+  font-weight:750;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.error-box{
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,85,105,.34);
+  background:rgba(255,65,85,.09);
+  color:#ffb0ba;
+  font-size:12px;
+  line-height:1.5;
+  word-break:break-word;
+}
+
+.error-title{
+  color:#ff7e8c;
+  font-weight:900;
+  margin-bottom:3px;
+}
+
+.success-box{
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(63,220,139,.25);
+  background:rgba(63,220,139,.08);
+  color:#91edb9;
+  font-size:13px;
+}
+
+.room-code{
+  text-align:center;
+  font-size:clamp(30px,8vw,42px);
+  font-weight:950;
+  letter-spacing:8px;
+  background:#080d1b;
+  border-radius:15px;
+  padding:17px 10px;
+  margin:10px 0;
+}
+
+.room-info{
+  text-align:center;
+  color:#8f9ab7;
+  font-size:12px;
+  letter-spacing:.8px;
+}
+
+.loading{
+  text-align:center;
+  padding:13px;
+  color:#9ba6c2;
+  font-size:13px;
+}
+
+.game-header{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:10px;
+  align-items:center;
+  margin-bottom:14px;
+}
+
+.player-score{
+  background:#11172b;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;
+  padding:13px;
+}
+
+.player-score.right{
+  text-align:right;
+}
+
+.player-name{
+  color:#8994b1;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-size:10px;
+  font-weight:750;
+}
+
+.score{
+  font-size:28px;
+  font-weight:950;
+  line-height:1.1;
+  margin-top:3px;
+}
+
+.round-label{
+  text-align:center;
+  background:#1c2449;
+  border-radius:13px;
+  padding:9px 13px;
+  min-width:92px;
+}
+
+.round-small{
+  color:#929dc0;
+  font-size:9px;
+  letter-spacing:1px;
+}
+
+.round-number{
+  font-size:19px;
+  font-weight:900;
+}
+
+.status{
+  text-align:center;
+  font-size:17px;
+  font-weight:850;
+  margin-bottom:15px;
+}
+
+.secret-box{
+  text-align:center;
+  background:#080d1b;
+  border-radius:16px;
+  padding:17px;
+}
+
+.secret-title{
+  color:#9da8c4;
+  font-size:12px;
+  margin-bottom:8px;
+}
+
+.guess-form{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+}
+
+.guess-form input{
+  margin:0;
+}
+
+.guess-form button{
+  min-width:110px;
+}
+
+.history{
+  margin-top:17px;
+}
+
+.history-title{
+  color:#8f9ab7;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+.guess-item{
+  background:#0a1020;
+  border:1px solid rgba(255,255,255,.055);
+  border-radius:12px;
+  padding:11px;
+  margin-bottom:7px;
+}
+
+.guess-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  font-weight:800;
+}
+
+.guess-result{
+  color:#9ca7c1;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.feedback-list{
+  display:grid;
+  gap:5px;
+  margin-top:8px;
+}
+
+.feedback-digit{
+  border-radius:8px;
+  padding:7px 9px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.correct-position{
+  background:rgba(62,215,133,.10);
+  color:#81e9ad;
+}
+
+.wrong-position{
+  background:rgba(244,189,54,.10);
+  color:#ffd16a;
+}
+
+.not-found{
+  background:rgba(255,75,90,.08);
+  color:#ff9da7;
+}
+
+.result-box,
+.winner-box{
+  text-align:center;
+  border-radius:17px;
+  padding:23px 16px;
+  margin-top:15px;
+  background:#151d38;
+  border:1px solid rgba(255,255,255,.055);
+}
+
+.result-title,
+.winner-title{
+  font-size:24px;
+  font-weight:950;
+}
+
+.result-points{
+  color:#9ca7c2;
+  margin-top:7px;
+  font-size:13px;
+}
+
+.winner-score{
+  font-size:38px;
+  font-weight:950;
+  margin-top:7px;
+}
+
+.small-note{
+  color:#818ca8;
+  font-size:11px;
+  line-height:1.5;
+  margin-top:9px;
+}
+
+@media(max-width:600px){
+
+  body{
+    padding:10px;
+  }
+
+  .hero{
+    padding-top:25px;
+  }
+
+  .mode-grid,
+  .button-row{
+    grid-template-columns:1fr;
+  }
+
+  .game-header{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .round-label{
+    grid-column:1 / -1;
+    grid-row:1;
+    width:100%;
+  }
+
+  .player-score{
+    grid-row:2;
+  }
+
+  .player-score.right{
+    text-align:right;
+  }
+
+  .guess-form{
+    flex-direction:column;
+  }
+
+  .guess-form button{
+    width:100%;
+  }
+}
+</style>
 </head>
 
 <body>
 
 <div class="app">
 
-  <!-- HOME -->
-  <section id="homeScreen" class="screen active">
+<!-- HOME -->
 
-    <div class="hero">
-      <div class="logo">NUMBER DUEL</div>
-      <div class="subtitle">
-        Challenge your opponent. Guess smart. Score more.
-      </div>
+<section id="homeScreen" class="screen active">
+
+  <div class="hero">
+    <div class="logo">NUMBER DUEL</div>
+
+    <div class="subtitle">
+      Think fast. Guess smart. Win the duel.
     </div>
-
-    <div class="card">
-
-      <div class="mode-grid">
-
-        <button class="mode-btn selected" id="duelModeBtn">
-          <div class="mode-icon">🎯</div>
-          <div class="mode-title">Duel</div>
-          <div class="mode-description">
-            Guess a number from 1–100
-          </div>
-        </button>
-
-        <button class="mode-btn" id="crackModeBtn">
-          <div class="mode-icon">🔐</div>
-          <div class="mode-title">Crack</div>
-          <div class="mode-description">
-            Crack your opponent's 4-digit code
-          </div>
-        </button>
-
-      </div>
-
-      <div class="button-row">
-        <button class="primary" id="createRoomBtn">
-          Create Room
-        </button>
-
-        <button class="secondary" id="showJoinBtn">
-          Join Room
-        </button>
-      </div>
-
-      <div id="homeError"></div>
-
-    </div>
-
-    <div class="card hidden" id="joinCard">
-
-      <label>
-        Enter Room Code
-      </label>
-
-      <input
-        id="joinCodeInput"
-        maxlength="6"
-        placeholder="ABC123"
-        autocomplete="off"
-      />
-
-      <div style="height:12px"></div>
-
-      <button class="primary" id="joinRoomBtn" style="width:100%">
-        Join Room
-      </button>
-
-      <div id="joinError"></div>
-
-    </div>
-
-  </section>
+  </div>
 
 
-  <!-- WAITING -->
-  <section id="waitingScreen" class="screen">
+  <div class="card">
 
-    <div class="hero">
-      <div class="logo" style="font-size:45px">
-        ROOM READY
-      </div>
-      <div class="subtitle">
-        Share this room code with your opponent
-      </div>
-    </div>
-
-    <div class="card">
-
-      <div class="room-info">
-        ROOM CODE
-      </div>
-
-      <div id="createdRoomCode" class="room-code">
-        ------
-      </div>
-
-      <div class="room-info">
-        Waiting for opponent...
-      </div>
-
-      <div class="loading" id="waitingStatus">
-        Checking room...
-      </div>
+    <div class="mode-grid">
 
       <button
-        class="secondary"
-        id="cancelRoomBtn"
-        style="width:100%;margin-top:10px"
-      >
-        Leave Room
+        id="duelModeBtn"
+        class="mode-btn selected"
+        type="button">
+
+        <div class="mode-icon">🎯</div>
+
+        <div class="mode-title">
+          Duel
+        </div>
+
+        <div class="mode-description">
+          Guess a number from 1–100
+        </div>
+
+      </button>
+
+
+      <button
+        id="crackModeBtn"
+        class="mode-btn"
+        type="button">
+
+        <div class="mode-icon">🔐</div>
+
+        <div class="mode-title">
+          Crack
+        </div>
+
+        <div class="mode-description">
+          Crack a unique 4-digit code
+        </div>
+
       </button>
 
     </div>
 
-    <div id="waitingError"></div>
 
-  </section>
+    <div class="button-row">
+
+      <button
+        id="createRoomBtn"
+        class="primary"
+        type="button">
+
+        Create Room
+
+      </button>
 
 
-  <!-- GAME -->
-  <section id="gameScreen" class="screen">
+      <button
+        id="showJoinBtn"
+        class="secondary"
+        type="button">
 
-    <div class="hero" style="padding-bottom:15px">
-      <div class="logo" style="font-size:42px">
-        NUMBER DUEL
-      </div>
-      <div class="subtitle">
-        Room <span id="gameRoomCode"></span>
-      </div>
-    </div>
+        Join Room
 
-    <div class="game-header">
-
-      <div class="player-score">
-        <div class="player-name">You</div>
-        <div class="score" id="myScore">0</div>
-      </div>
-
-      <div class="round-label">
-        <div class="round-small">ROUND</div>
-        <div class="round-number">
-          <span id="roundNumber">1</span>/3
-        </div>
-      </div>
-
-      <div class="player-score right">
-        <div class="player-name">Opponent</div>
-        <div class="score" id="opponentScore">0</div>
-      </div>
+      </button>
 
     </div>
 
-    <div class="card">
 
-      <div class="status" id="gameStatus">
-        Loading...
-      </div>
+    <div id="homeError"></div>
 
-      <!-- SECRET SETUP -->
-      <div id="secretSection">
-
-        <div class="secret-box">
-
-          <div class="secret-title" id="secretInstruction">
-            Set your secret number
-          </div>
-
-          <input
-            id="secretInput"
-            autocomplete="off"
-            inputmode="numeric"
-            placeholder="Enter your secret"
-          />
-
-          <button
-            class="primary"
-            id="setSecretBtn"
-            style="width:100%;margin-top:12px"
-          >
-            Set Secret
-          </button>
-
-          <div id="secretMessage"></div>
-
-        </div>
-
-      </div>
+  </div>
 
 
-      <!-- GUESS -->
-      <div id="guessSection" class="hidden">
+  <div
+    id="joinCard"
+    class="card hidden">
 
-        <div class="secret-box">
+    <label for="joinCodeInput">
+      Room Code
+    </label>
 
-          <div class="secret-title" id="guessInstruction">
-            Enter your guess
-          </div>
+    <input
+      id="joinCodeInput"
+      maxlength="6"
+      autocomplete="off"
+      autocapitalize="characters"
+      spellcheck="false"
+      placeholder="ABC123">
 
-          <div class="guess-form">
+    <button
+      id="joinRoomBtn"
+      class="primary"
+      type="button"
+      style="width:100%;margin-top:10px">
 
-            <input
-              id="guessInput"
-              autocomplete="off"
-              inputmode="numeric"
-              placeholder="Your guess"
-            />
+      Join Room
 
-            <button class="primary" id="guessBtn">
-              Guess
-            </button>
+    </button>
 
-          </div>
+    <div id="joinError"></div>
 
-          <div id="guessError"></div>
+  </div>
 
-        </div>
-
-        <div class="history">
-
-          <div class="history-title">
-            Your Guess History
-          </div>
-
-          <div id="guessHistory"></div>
-
-        </div>
-
-      </div>
+</section>
 
 
-      <div id="roundResult"></div>
+<!-- WAITING -->
 
-      <div id="finalResult"></div>
+<section id="waitingScreen" class="screen">
+
+  <div class="hero">
+
+    <div
+      class="logo"
+      style="font-size:44px">
+
+      ROOM READY
+
+    </div>
+
+    <div class="subtitle">
+      Share the code with your opponent
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <div class="room-info">
+      ROOM CODE
+    </div>
+
+    <div
+      id="createdRoomCode"
+      class="room-code">
+
+      ------
+
+    </div>
+
+    <div
+      id="waitingStatus"
+      class="loading">
+
+      Waiting for opponent…
 
     </div>
 
     <button
+      id="cancelRoomBtn"
       class="secondary"
-      id="leaveGameBtn"
-      style="width:100%"
-    >
-      Leave Game
+      type="button"
+      style="width:100%">
+
+      Leave Room
+
     </button>
 
-  </section>
+  </div>
+
+
+  <div id="waitingError"></div>
+
+</section>
+
+
+<!-- GAME -->
+
+<section id="gameScreen" class="screen">
+
+  <div
+    class="hero"
+    style="padding-bottom:15px">
+
+    <div
+      class="logo"
+      style="font-size:42px">
+
+      NUMBER DUEL
+
+    </div>
+
+    <div class="subtitle">
+      Room <span id="gameRoomCode"></span>
+    </div>
+
+  </div>
+
+
+  <div class="game-header">
+
+    <div class="player-score">
+
+      <div class="player-name">
+        You
+      </div>
+
+      <div
+        id="myScore"
+        class="score">
+
+        0
+
+      </div>
+
+    </div>
+
+
+    <div class="round-label">
+
+      <div class="round-small">
+        ROUND
+      </div>
+
+      <div class="round-number">
+
+        <span id="roundNumber">
+          1
+        </span>/3
+
+      </div>
+
+    </div>
+
+
+    <div class="player-score right">
+
+      <div class="player-name">
+        Opponent
+      </div>
+
+      <div
+        id="opponentScore"
+        class="score">
+
+        0
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <div
+      id="gameStatus"
+      class="status">
+
+      Loading…
+
+    </div>
+
+
+    <!-- SECRET -->
+
+    <div id="secretSection">
+
+      <div class="secret-box">
+
+        <div
+          id="secretInstruction"
+          class="secret-title">
+
+          Choose your secret number
+
+        </div>
+
+
+        <input
+          id="secretInput"
+          autocomplete="off"
+          inputmode="numeric"
+          maxlength="3"
+          placeholder="1–100">
+
+
+        <button
+          id="setSecretBtn"
+          class="primary"
+          type="button"
+          style="width:100%;margin-top:10px">
+
+          Set Secret
+
+        </button>
+
+
+        <div id="secretMessage"></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- GUESS -->
+
+    <div
+      id="guessSection"
+      class="hidden">
+
+      <div class="secret-box">
+
+        <div
+          id="guessInstruction"
+          class="secret-title">
+
+          Guess opponent's number
+
+        </div>
+
+
+        <div class="guess-form">
+
+          <input
+            id="guessInput"
+            autocomplete="off"
+            inputmode="numeric"
+            maxlength="3"
+            placeholder="Your guess">
+
+
+          <button
+            id="guessBtn"
+            class="primary"
+            type="button">
+
+            Guess
+
+          </button>
+
+        </div>
+
+
+        <div id="guessError"></div>
+
+      </div>
+
+
+      <div class="history">
+
+        <div class="history-title">
+          Your Guess History
+        </div>
+
+        <div id="guessHistory"></div>
+
+      </div>
+
+    </div>
+
+
+    <div id="roundResult"></div>
+
+    <div id="finalResult"></div>
+
+  </div>
+
+
+  <button
+    id="leaveGameBtn"
+    class="secondary"
+    type="button"
+    style="width:100%">
+
+    Leave Game
+
+  </button>
+
+</section>
 
 </div>
 
 
 <script>
 
-  /* =========================================================
-     SUPABASE CONFIG
-     ========================================================= */
+/* =========================================================
+   SUPABASE CONFIG
+========================================================= */
 
-  const SUPABASE_URL =
-    "https://uenyqkyuyxbbqehjzspk.supabase.co";
-
-  /*
-    IMPORTANT:
-    Replace this with YOUR existing Supabase anon/publishable key.
-  */
-
-  const SUPABASE_KEY =
-    "sb_publishable_FGT-Tw77u5BTy4zxbqwiHA_bmndBToE";
+const SUPABASE_URL =
+  "https://uenyqkyuyxbbqehjzspk.supabase.co";
 
 
-  const supabaseClient =
-    window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
+/*
+ IMPORTANT:
+ Replace this with your existing
+ Supabase anon/publishable key.
+*/
+
+const SUPABASE_KEY =
+  "sb_publishable_FGT-Tw77u5BTy4zxbqwiHA_bmndBToE";
+
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const TOTAL_ROUNDS = 3;
+
+const MAX_POINTS = 100;
+
+const MIN_POINTS = 10;
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let selectedMode = "duel";
+
+let roomCode = "";
+
+let myRole = "";
+
+let currentState = null;
+
+let realtimeChannel = null;
+
+let nextRoundTimer = null;
+
+let transitionKey = "";
+
+
+/* =========================================================
+   DOM HELPER
+========================================================= */
+
+const $ = id =>
+  document.getElementById(id);
+
+
+/* =========================================================
+   SCREEN
+========================================================= */
+
+function showScreen(screen){
+
+  document
+    .querySelectorAll(".screen")
+    .forEach(element =>
+      element.classList.remove("active")
     );
 
-
-  /* =========================================================
-     GAME CONFIG
-     ========================================================= */
-
-  const TOTAL_ROUNDS = 3;
-
-  const MAX_ROUND_POINTS = 100;
-
-  const MIN_ROUND_POINTS = 10;
+  screen.classList.add("active");
+}
 
 
-  /* =========================================================
-     VARIABLES
-     ========================================================= */
+/* =========================================================
+   ERROR HANDLING
+========================================================= */
 
-  let selectedMode = "duel";
+function clearError(element){
 
-  let roomCode = null;
-
-  let myRole = null;
-
-  let currentState = null;
-
-  let realtimeChannel = null;
-
-  let nextRoundTimer = null;
-
-  let transitionKey = null;
+  if(element)
+    element.innerHTML = "";
+}
 
 
-  /* =========================================================
-     DOM
-     ========================================================= */
+function showError(
+  element,
+  error,
+  title = "Error"
+){
 
-  const homeScreen =
-    document.getElementById("homeScreen");
-
-  const waitingScreen =
-    document.getElementById("waitingScreen");
-
-  const gameScreen =
-    document.getElementById("gameScreen");
-
-  const homeError =
-    document.getElementById("homeError");
-
-  const joinCard =
-    document.getElementById("joinCard");
-
-  const joinError =
-    document.getElementById("joinError");
-
-  const waitingError =
-    document.getElementById("waitingError");
-
-  const secretMessage =
-    document.getElementById("secretMessage");
-
-  const guessError =
-    document.getElementById("guessError");
+  if(!element)
+    return;
 
 
-  /* =========================================================
-     HELPERS
-     ========================================================= */
+  let message =
+    "Unknown error.";
 
-  function showScreen(screen) {
 
-    homeScreen.classList.remove("active");
-    waitingScreen.classList.remove("active");
-    gameScreen.classList.remove("active");
+  if(typeof error === "string"){
 
-    screen.classList.add("active");
+    message =
+      escapeHtml(error);
+
+  }else if(error){
+
+    const parts = [];
+
+
+    if(error.message){
+
+      parts.push(
+        `Message: ${escapeHtml(
+          error.message
+        )}`
+      );
+    }
+
+
+    if(error.details){
+
+      parts.push(
+        `Details: ${escapeHtml(
+          error.details
+        )}`
+      );
+    }
+
+
+    if(error.hint){
+
+      parts.push(
+        `Hint: ${escapeHtml(
+          error.hint
+        )}`
+      );
+    }
+
+
+    if(error.code){
+
+      parts.push(
+        `Code: ${escapeHtml(
+          error.code
+        )}`
+      );
+    }
+
+
+    message =
+      parts.length
+        ? parts.join("<br>")
+        : escapeHtml(
+            JSON.stringify(error)
+          );
   }
 
 
-  function showError(container, error, title = "Supabase Error") {
+  element.innerHTML = `
+    <div class="error-box">
 
-    if (!container) return;
-
-    let message = "Unknown error.";
-
-    if (typeof error === "string") {
-
-      message = error;
-
-    } else if (error) {
-
-      const parts = [];
-
-      if (error.message) {
-        parts.push(`Message: ${error.message}`);
-      }
-
-      if (error.details) {
-        parts.push(`Details: ${error.details}`);
-      }
-
-      if (error.hint) {
-        parts.push(`Hint: ${error.hint}`);
-      }
-
-      if (error.code) {
-        parts.push(`Code: ${error.code}`);
-      }
-
-      message =
-        parts.length
-          ? parts.join("<br>")
-          : JSON.stringify(error);
-    }
-
-    container.innerHTML = `
-      <div class="error-box">
-        <div class="error-title">
-          ⚠️ ${escapeHtml(title)}
-        </div>
-
-        <div>
-          ${message}
-        </div>
+      <div class="error-title">
+        ⚠️ ${escapeHtml(title)}
       </div>
-    `;
+
+      ${message}
+
+    </div>
+  `;
+}
+
+
+function escapeHtml(value){
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+/* =========================================================
+   ROOM CODE
+========================================================= */
+
+function generateRoomCode(){
+
+  const chars =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  let code = "";
+
+
+  for(
+    let i = 0;
+    i < 6;
+    i++
+  ){
+
+    code +=
+      chars[
+        Math.floor(
+          Math.random() *
+          chars.length
+        )
+      ];
   }
 
 
-  function clearError(container) {
-
-    if (container) {
-      container.innerHTML = "";
-    }
-  }
+  return code;
+}
 
 
-  function escapeHtml(value) {
+/* =========================================================
+   PLAYER STATE
+========================================================= */
 
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
+function playerState(){
 
+  return {
 
-  function generateRoomCode() {
+    joined:false,
 
-    const chars =
-      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    secret:null,
 
-    let result = "";
+    secretSet:false,
 
-    for (let i = 0; i < 6; i++) {
+    guesses:[],
 
-      result +=
-        chars[
-          Math.floor(
-            Math.random() * chars.length
-          )
-        ];
-    }
+    roundPoints:0,
 
-    return result;
-  }
+    totalPoints:0
+
+  };
+}
 
 
-  function createPlayerState() {
+/* =========================================================
+   INITIAL STATE
+========================================================= */
 
-    return {
+function initialState(mode){
 
-      secret: null,
+  return {
 
-      secretSet: false,
+    mode,
 
-      guesses: [],
+    status:
+      "waiting_for_join",
 
-      roundPoints: 0,
+    round:1,
 
-      totalPoints: 0
+    totalRounds:
+      TOTAL_ROUNDS,
 
-    };
-  }
+    turn:"a",
 
+    winner:null,
 
-  function createInitialState(mode) {
+    roundWinner:null,
 
-    return {
+    roundFinished:false,
 
-      mode,
+    a:
+      playerState(),
 
-      status: "waiting_for_join",
+    b:
+      playerState()
 
-      round: 1,
-
-      totalRounds: TOTAL_ROUNDS,
-
-      turn: "a",
-
-      winner: null,
-
-      roundWinner: null,
-
-      roundFinished: false,
-
-      a: createPlayerState(),
-
-      b: createPlayerState()
-
-    };
-  }
+  };
+}
 
 
-  function normalizePlayerState(player) {
+/* =========================================================
+   NORMALIZE STATE
+========================================================= */
 
-    return {
+function normalizePlayer(player){
 
-      secret:
-        player?.secret ?? null,
+  return {
 
-      secretSet:
-        !!player?.secretSet,
+    joined:
+      !!player?.joined,
 
-      guesses:
-        Array.isArray(player?.guesses)
-          ? player.guesses
-          : [],
+    secret:
+      player?.secret ?? null,
 
-      roundPoints:
-        Number(player?.roundPoints || 0),
+    secretSet:
+      !!player?.secretSet,
 
-      totalPoints:
-        Number(player?.totalPoints || 0)
+    guesses:
+      Array.isArray(
+        player?.guesses
+      )
+        ? player.guesses
+        : [],
 
-    };
-  }
+    roundPoints:
+      Number(
+        player?.roundPoints || 0
+      ),
 
+    totalPoints:
+      Number(
+        player?.totalPoints || 0
+      )
 
-  function normalizeState(state) {
-
-    state.a =
-      normalizePlayerState(state.a);
-
-    state.b =
-      normalizePlayerState(state.b);
-
-    state.round =
-      Number(state.round || 1);
-
-    state.totalRounds =
-      Number(state.totalRounds || TOTAL_ROUNDS);
-
-    state.turn =
-      state.turn || "a";
-
-    state.roundFinished =
-      !!state.roundFinished;
-
-    return state;
-  }
+  };
+}
 
 
-  function calculatePoints(guessCount) {
+function normalizeState(state){
 
-    return Math.max(
-      MIN_ROUND_POINTS,
-      MAX_ROUND_POINTS -
-      ((guessCount - 1) * 10)
+  state =
+    state ||
+    initialState("duel");
+
+
+  state.a =
+    normalizePlayer(
+      state.a
     );
+
+
+  state.b =
+    normalizePlayer(
+      state.b
+    );
+
+
+  state.round =
+    Number(
+      state.round || 1
+    );
+
+
+  state.totalRounds =
+    Number(
+      state.totalRounds ||
+      TOTAL_ROUNDS
+    );
+
+
+  state.turn =
+    state.turn ||
+    "a";
+
+
+  state.roundFinished =
+    !!state.roundFinished;
+
+
+  return state;
+}
+
+
+/* =========================================================
+   POINTS
+========================================================= */
+
+function pointsForGuess(count){
+
+  return Math.max(
+    MIN_POINTS,
+    MAX_POINTS -
+      ((count - 1) * 10)
+  );
+}
+
+
+/* =========================================================
+   MODE SELECTION
+========================================================= */
+
+$("duelModeBtn")
+.addEventListener(
+  "click",
+  () => {
+
+    selectedMode =
+      "duel";
+
+
+    $("duelModeBtn")
+      .classList.add(
+        "selected"
+      );
+
+
+    $("crackModeBtn")
+      .classList.remove(
+        "selected"
+      );
+
+
+    updateInputMode();
+  }
+);
+
+
+$("crackModeBtn")
+.addEventListener(
+  "click",
+  () => {
+
+    selectedMode =
+      "crack";
+
+
+    $("crackModeBtn")
+      .classList.add(
+        "selected"
+      );
+
+
+    $("duelModeBtn")
+      .classList.remove(
+        "selected"
+      );
+
+
+    updateInputMode();
+  }
+);
+
+
+/* =========================================================
+   JOIN UI
+========================================================= */
+
+$("showJoinBtn")
+.addEventListener(
+  "click",
+  () => {
+
+    clearError(
+      $("homeError")
+    );
+
+
+    $("joinCard")
+      .classList.toggle(
+        "hidden"
+      );
+  }
+);
+
+
+/* =========================================================
+   CREATE ROOM
+========================================================= */
+
+$("createRoomBtn")
+.addEventListener(
+  "click",
+  createRoom
+);
+
+
+async function createRoom(){
+
+  clearError(
+    $("homeError")
+  );
+
+
+  const button =
+    $("createRoomBtn");
+
+
+  if(button.disabled)
+    return;
+
+
+  if(
+    !SUPABASE_KEY ||
+    SUPABASE_KEY ===
+      "YOUR_SUPABASE_ANON_KEY"
+  ){
+
+    showError(
+      $("homeError"),
+      "Paste your existing Supabase anon/publishable key into SUPABASE_KEY.",
+      "Supabase Key Missing"
+    );
+
+    return;
   }
 
 
-  /* =========================================================
-     MODE SELECTION
-     ========================================================= */
-
-  document
-    .getElementById("duelModeBtn")
-    .addEventListener("click", () => {
-
-      selectedMode = "duel";
-
-      document
-        .getElementById("duelModeBtn")
-        .classList.add("selected");
-
-      document
-        .getElementById("crackModeBtn")
-        .classList.remove("selected");
-
-    });
+  button.disabled =
+    true;
 
 
-  document
-    .getElementById("crackModeBtn")
-    .addEventListener("click", () => {
-
-      selectedMode = "crack";
-
-      document
-        .getElementById("crackModeBtn")
-        .classList.remove("selected");
-
-      document
-        .getElementById("duelModeBtn")
-        .classList.add("selected");
-
-    });
+  button.textContent =
+    "Creating…";
 
 
-  document
-    .getElementById("showJoinBtn")
-    .addEventListener("click", () => {
+  try{
 
-      joinCard.classList.toggle("hidden");
+    /*
+      One database request.
+    */
 
-      clearError(homeError);
-
-    });
-
-
-  /* =========================================================
-     CREATE ROOM
-     ========================================================= */
-
-  document
-    .getElementById("createRoomBtn")
-    .addEventListener("click", createRoom);
+    let code =
+      generateRoomCode();
 
 
-  async function createRoom() {
-
-    clearError(homeError);
-
-    const button =
-      document.getElementById("createRoomBtn");
-
-    button.disabled = true;
-
-    button.textContent =
-      "Creating...";
+    const state =
+      initialState(
+        selectedMode
+      );
 
 
-    try {
+    let result =
+      await supabaseClient
+        .from("duels")
+        .insert({
+          code,
+          state,
+          updated_at:
+            new Date()
+              .toISOString()
+        })
+        .select()
+        .single();
 
-      if (
-        !SUPABASE_URL ||
-        !SUPABASE_KEY ||
-        SUPABASE_KEY === "YOUR_SUPABASE_ANON_KEY"
-      ) {
 
-        throw new Error(
-          "Supabase key is missing. Replace YOUR_SUPABASE_ANON_KEY with your existing anon/publishable key."
-        );
-      }
+    /*
+      Retry only on duplicate code.
+    */
 
+    if(
+      result.error &&
+      (
+        result.error.code ===
+          "23505" ||
+        result.error.message
+          ?.toLowerCase()
+          .includes("duplicate")
+      )
+    ){
 
-      roomCode =
+      code =
         generateRoomCode();
 
 
-      currentState =
-        createInitialState(selectedMode);
-
-
-      /*
-        First check whether the generated code already exists.
-      */
-
-      const { data: existingRoom, error: checkError } =
-        await supabaseClient
-          .from("duels")
-          .select("code")
-          .eq("code", roomCode)
-          .maybeSingle();
-
-
-      if (checkError) {
-
-        throw checkError;
-      }
-
-
-      /*
-        Extremely unlikely collision.
-      */
-
-      if (existingRoom) {
-
-        roomCode =
-          generateRoomCode();
-      }
-
-
-      /*
-        INSERT ROOM
-      */
-
-      const { data, error } =
+      result =
         await supabaseClient
           .from("duels")
           .insert({
-
-            code: roomCode,
-
-            state: currentState
-
+            code,
+            state,
+            updated_at:
+              new Date()
+                .toISOString()
           })
           .select()
           .single();
-
-
-      if (error) {
-
-        console.error(
-          "CREATE ROOM SUPABASE ERROR:",
-          error
-        );
-
-        throw error;
-      }
-
-
-      console.log(
-        "ROOM CREATED:",
-        data
-      );
-
-
-      myRole = "a";
-
-
-      document
-        .getElementById("createdRoomCode")
-        .textContent = roomCode;
-
-
-      document
-        .getElementById("waitingStatus")
-        .textContent =
-        "Waiting for opponent...";
-
-
-      showScreen(waitingScreen);
-
-
-      subscribeToRoom();
-
-    } catch (error) {
-
-      console.error(
-        "CREATE ROOM FAILED:",
-        error
-      );
-
-      showError(
-        homeError,
-        error,
-        "Could not create room"
-      );
-
-    } finally {
-
-      button.disabled = false;
-
-      button.textContent =
-        "Create Room";
-    }
-  }
-
-
-  /* =========================================================
-     JOIN ROOM
-     ========================================================= */
-
-  document
-    .getElementById("joinRoomBtn")
-    .addEventListener("click", joinRoom);
-
-
-  async function joinRoom() {
-
-    clearError(joinError);
-
-    const button =
-      document.getElementById("joinRoomBtn");
-
-    const input =
-      document.getElementById("joinCodeInput");
-
-    const code =
-      input.value.trim().toUpperCase();
-
-
-    if (code.length !== 6) {
-
-      showError(
-        joinError,
-        "Room code must contain exactly 6 characters.",
-        "Invalid Room Code"
-      );
-
-      return;
     }
 
 
-    button.disabled = true;
+    if(result.error)
+      throw result.error;
+
+
+    roomCode =
+      code;
+
+
+    myRole =
+      "a";
+
+
+    currentState =
+      normalizeState(
+        result.data.state
+      );
+
+
+    $("createdRoomCode")
+      .textContent =
+      roomCode;
+
+
+    $("waitingStatus")
+      .textContent =
+      "Waiting for opponent…";
+
+
+    showScreen(
+      $("waitingScreen")
+    );
+
+
+    subscribeToRoom();
+
+
+  }catch(error){
+
+    console.error(
+      "CREATE ROOM ERROR:",
+      error
+    );
+
+
+    showError(
+      $("homeError"),
+      error,
+      "Could not create room"
+    );
+
+
+  }finally{
+
+    button.disabled =
+      false;
+
 
     button.textContent =
-      "Joining...";
+      "Create Room";
+  }
+}
 
 
-    try {
+/* =========================================================
+   JOIN ROOM
+========================================================= */
 
-      const { data, error } =
-        await supabaseClient
-          .from("duels")
-          .select("*")
-          .eq("code", code)
-          .maybeSingle();
-
-
-      if (error) {
-
-        console.error(
-          "JOIN LOOKUP ERROR:",
-          error
-        );
-
-        throw error;
-      }
+$("joinRoomBtn")
+.addEventListener(
+  "click",
+  joinRoom
+);
 
 
-      if (!data) {
+async function joinRoom(){
 
-        throw new Error(
-          "Room not found. Check the room code and try again."
-        );
-      }
-
-
-      currentState =
-        normalizeState(data.state);
+  clearError(
+    $("joinError")
+  );
 
 
-      /*
-        Room already has two players.
-      */
-
-      if (currentState.b?.joined) {
-
-        throw new Error(
-          "This room already has two players."
-        );
-      }
+  const button =
+    $("joinRoomBtn");
 
 
-      /*
-        Mark player B as joined.
-      */
-
-      currentState.b.joined = true;
-
-      currentState.status =
-        "playing";
+  const code =
+    $("joinCodeInput")
+      .value
+      .trim()
+      .toUpperCase();
 
 
-      const { data: updatedData, error: updateError } =
-        await supabaseClient
-          .from("duels")
-          .update({
+  if(
+    !/^[A-Z0-9]{6}$/
+      .test(code)
+  ){
 
-            state: currentState
+    showError(
+      $("joinError"),
+      "Enter a valid 6-character room code.",
+      "Invalid Room Code"
+    );
 
-          })
-          .eq("code", code)
-          .select()
-          .single();
-
-
-      if (updateError) {
-
-        console.error(
-          "JOIN UPDATE ERROR:",
-          updateError
-        );
-
-        throw updateError;
-      }
-
-
-      roomCode = code;
-
-      myRole = "b";
-
-      currentState =
-        normalizeState(updatedData.state);
-
-
-      document
-        .getElementById("gameRoomCode")
-        .textContent = roomCode;
-
-
-      showScreen(gameScreen);
-
-
-      subscribeToRoom();
-
-      renderGame();
-
-
-    } catch (error) {
-
-      console.error(
-        "JOIN ROOM FAILED:",
-        error
-      );
-
-      showError(
-        joinError,
-        error,
-        "Could not join room"
-      );
-
-    } finally {
-
-      button.disabled = false;
-
-      button.textContent =
-        "Join Room";
-    }
+    return;
   }
 
 
-  /* =========================================================
-     REALTIME
-     ========================================================= */
+  if(button.disabled)
+    return;
 
-  function subscribeToRoom() {
 
-    if (realtimeChannel) {
+  button.disabled =
+    true;
 
-      supabaseClient
-        .removeChannel(realtimeChannel);
+
+  button.textContent =
+    "Joining…";
+
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("duels")
+        .select("*")
+        .eq("code",code)
+        .maybeSingle();
+
+
+    if(error)
+      throw error;
+
+
+    if(!data){
+
+      throw new Error(
+        "Room not found. Check the code and try again."
+      );
     }
 
 
-    realtimeChannel =
-      supabaseClient
-        .channel(`duel-${roomCode}`)
-
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "duels",
-            filter: `code=eq.${roomCode}`
-          },
-          payload => {
-
-            console.log(
-              "REALTIME UPDATE:",
-              payload
-            );
-
-
-            if (
-              payload.new &&
-              payload.new.state
-            ) {
-
-              currentState =
-                normalizeState(
-                  payload.new.state
-                );
-
-
-              if (
-                currentState.status === "playing" ||
-                currentState.round > 1
-              ) {
-
-                document
-                  .getElementById("gameRoomCode")
-                  .textContent =
-                  roomCode;
-
-                showScreen(gameScreen);
-
-                renderGame();
-
-              } else {
-
-                renderWaiting();
-              }
-            }
-
-          }
-        )
-
-        .subscribe(status => {
-
-          console.log(
-            "REALTIME STATUS:",
-            status
-          );
-
-          if (
-            status === "CHANNEL_ERROR"
-          ) {
-
-            showError(
-              waitingError,
-              "Realtime subscription failed. Check whether Realtime is enabled for the duels table.",
-              "Realtime Error"
-            );
-          }
-
-        });
-  }
-
-
-  /* =========================================================
-     WAITING
-     ========================================================= */
-
-  function renderWaiting() {
-
-    document
-      .getElementById("waitingStatus")
-      .textContent =
-      currentState?.status === "playing"
-        ? "Opponent joined!"
-        : "Waiting for opponent...";
-
-
-    if (
-      currentState?.status === "playing"
-    ) {
-
-      document
-        .getElementById("gameRoomCode")
-        .textContent =
-        roomCode;
-
-      showScreen(gameScreen);
-
-      renderGame();
-    }
-  }
-
-
-  /* =========================================================
-     SECRET
-     ========================================================= */
-
-  document
-    .getElementById("setSecretBtn")
-    .addEventListener("click", setSecret);
-
-
-  async function setSecret() {
-
-    clearError(secretMessage);
-
-    const input =
-      document.getElementById("secretInput");
-
-    const raw =
-      input.value.trim();
-
-
-    if (!validateSecret(raw)) {
-
-      return;
-    }
-
-
-    const player =
-      currentState[myRole];
-
-
-    if (player.secretSet) {
-
-      showError(
-        secretMessage,
-        "You already set your secret for this round.",
-        "Secret Already Set"
+    const state =
+      normalizeState(
+        data.state
       );
 
-      return;
+
+    if(state.b.joined){
+
+      throw new Error(
+        "This room already has two players."
+      );
     }
 
 
-    player.secret =
-      raw;
-
-    player.secretSet =
+    state.b.joined =
       true;
 
 
-    /*
-      Start round when both players
-      have selected their secrets.
-    */
-
-    if (
-      currentState.a.secretSet &&
-      currentState.b.secretSet
-    ) {
-
-      currentState.status =
-        "playing";
-
-      currentState.turn =
-        "a";
-    }
+    state.status =
+      "playing";
 
 
-    await saveState();
+    const {
+      data:updated,
+      error:updateError
+    } =
+      await supabaseClient
+        .from("duels")
+        .update({
+          state,
+          updated_at:
+            new Date()
+              .toISOString()
+        })
+        .eq("code",code)
+        .select()
+        .single();
 
+
+    if(updateError)
+      throw updateError;
+
+
+    roomCode =
+      code;
+
+
+    myRole =
+      "b";
+
+
+    currentState =
+      normalizeState(
+        updated.state
+      );
+
+
+    $("gameRoomCode")
+      .textContent =
+      roomCode;
+
+
+    showScreen(
+      $("gameScreen")
+    );
+
+
+    subscribeToRoom();
+
+    renderGame();
+
+
+  }catch(error){
+
+    console.error(
+      "JOIN ROOM ERROR:",
+      error
+    );
+
+
+    showError(
+      $("joinError"),
+      error,
+      "Could not join room"
+    );
+
+
+  }finally{
+
+    button.disabled =
+      false;
+
+
+    button.textContent =
+      "Join Room";
+  }
+}
+
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function subscribeToRoom(){
+
+  if(realtimeChannel){
+
+    supabaseClient
+      .removeChannel(
+        realtimeChannel
+      );
   }
 
 
-  function validateSecret(raw) {
+  realtimeChannel =
+    supabaseClient
+      .channel(
+        `room-${roomCode}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"UPDATE",
+          schema:"public",
+          table:"duels",
+          filter:
+            `code=eq.${roomCode}`
+        },
+        payload => {
 
-    if (selectedMode === "duel") {
+          if(
+            payload.new &&
+            payload.new.state
+          ){
 
-      const number =
-        Number(raw);
-
-      if (
-        !Number.isInteger(number) ||
-        number < 1 ||
-        number > 100
-      ) {
-
-        showError(
-          secretMessage,
-          "For Duel, enter a whole number from 1 to 100.",
-          "Invalid Secret"
-        );
-
-        return false;
-      }
-
-      return true;
-    }
+            currentState =
+              normalizeState(
+                payload.new.state
+              );
 
 
-    /*
-      CRACK
-    */
+            if(
+              currentState.status ===
+              "playing"
+            ){
 
-    if (!/^\d{4}$/.test(raw)) {
+              $("gameRoomCode")
+                .textContent =
+                roomCode;
+
+
+              showScreen(
+                $("gameScreen")
+              );
+
+
+              renderGame();
+
+            }else{
+
+              renderWaiting();
+            }
+          }
+        }
+      )
+      .subscribe(
+        status => {
+
+          console.log(
+            "Realtime:",
+            status
+          );
+
+
+          if(
+            status ===
+            "CHANNEL_ERROR"
+          ){
+
+            showError(
+              $("waitingError"),
+              "Realtime connection failed. Make sure the duels table is enabled in Supabase Realtime.",
+              "Realtime Error"
+            );
+          }
+        }
+      );
+}
+
+
+/* =========================================================
+   WAITING
+========================================================= */
+
+function renderWaiting(){
+
+  if(
+    currentState?.status ===
+    "playing"
+  ){
+
+    $("gameRoomCode")
+      .textContent =
+      roomCode;
+
+
+    showScreen(
+      $("gameScreen")
+    );
+
+
+    renderGame();
+
+  }else{
+
+    $("waitingStatus")
+      .textContent =
+      "Waiting for opponent…";
+  }
+}
+
+
+/* =========================================================
+   SECRET
+========================================================= */
+
+$("setSecretBtn")
+.addEventListener(
+  "click",
+  setSecret
+);
+
+
+async function setSecret(){
+
+  clearError(
+    $("secretMessage")
+  );
+
+
+  const value =
+    $("secretInput")
+      .value
+      .trim();
+
+
+  const player =
+    currentState[
+      myRole
+    ];
+
+
+  if(player.secretSet){
+
+    showError(
+      $("secretMessage"),
+      "Your secret is already locked for this round.",
+      "Already Set"
+    );
+
+    return;
+  }
+
+
+  if(
+    !validateSecret(value)
+  )
+    return;
+
+
+  player.secret =
+    value;
+
+
+  player.secretSet =
+    true;
+
+
+  if(
+    currentState.a.secretSet &&
+    currentState.b.secretSet
+  ){
+
+    currentState.status =
+      "playing";
+
+
+    currentState.turn =
+      "a";
+  }
+
+
+  await saveState();
+}
+
+
+function validateSecret(value){
+
+  if(
+    currentState.mode ===
+    "duel"
+  ){
+
+    if(
+      !/^\d+$/.test(value)
+    ){
 
       showError(
-        secretMessage,
-        "For Crack, enter exactly 4 digits.",
+        $("secretMessage"),
+        "Enter a whole number from 1 to 100.",
         "Invalid Secret"
       );
 
@@ -1605,13 +1898,18 @@
     }
 
 
-    if (
-      new Set(raw.split("")).size !== 4
-    ) {
+    const number =
+      Number(value);
+
+
+    if(
+      number < 1 ||
+      number > 100
+    ){
 
       showError(
-        secretMessage,
-        "All 4 digits must be unique.",
+        $("secretMessage"),
+        "Enter a whole number from 1 to 100.",
         "Invalid Secret"
       );
 
@@ -1623,178 +1921,166 @@
   }
 
 
-  /* =========================================================
-     GUESS
-     ========================================================= */
+  if(
+    !/^\d{4}$/.test(value)
+  ){
 
-  document
-    .getElementById("guessBtn")
-    .addEventListener("click", makeGuess);
+    showError(
+      $("secretMessage"),
+      "Crack requires exactly 4 digits.",
+      "Invalid Secret"
+    );
 
-
-  async function makeGuess() {
-
-    clearError(guessError);
-
-    if (!currentState) return;
+    return false;
+  }
 
 
-    if (
-      currentState.roundFinished
-    ) {
+  if(
+    new Set(
+      value.split("")
+    ).size !== 4
+  ){
 
-      return;
-    }
+    showError(
+      $("secretMessage"),
+      "All 4 digits must be different.",
+      "Invalid Secret"
+    );
 
-
-    if (
-      currentState.turn !== myRole
-    ) {
-
-      showError(
-        guessError,
-        "It is not your turn.",
-        "Wait for Opponent"
-      );
-
-      return;
-    }
+    return false;
+  }
 
 
-    const input =
-      document.getElementById("guessInput");
-
-    const raw =
-      input.value.trim();
+  return true;
+}
 
 
-    if (!validateGuess(raw)) {
+/* =========================================================
+   GUESS
+========================================================= */
 
-      return;
-    }
-
-
-    const mine =
-      currentState[myRole];
-
-    const opponentRole =
-      myRole === "a"
-        ? "b"
-        : "a";
-
-    const opponent =
-      currentState[opponentRole];
+$("guessBtn")
+.addEventListener(
+  "click",
+  makeGuess
+);
 
 
-    /*
-      Prevent duplicate guesses.
-    */
+async function makeGuess(){
 
-    if (
-      mine.guesses.some(
-        guess => guess.value === raw
-      )
-    ) {
-
-      showError(
-        guessError,
-        "You already made this guess.",
-        "Duplicate Guess"
-      );
-
-      return;
-    }
+  clearError(
+    $("guessError")
+  );
 
 
-    /*
-      DUEL
-    */
-
-    if (currentState.mode === "duel") {
-
-      mine.guesses.push({
-        value: raw
-      });
+  if(!currentState)
+    return;
 
 
-      const guess =
-        Number(raw);
-
-      const secret =
-        Number(opponent.secret);
-
-
-      if (guess === secret) {
-
-        const points =
-          calculatePoints(
-            mine.guesses.length
-          );
-
-        mine.roundPoints =
-          points;
-
-        mine.totalPoints +=
-          points;
+  if(
+    currentState.roundFinished
+  )
+    return;
 
 
-        currentState.roundWinner =
-          myRole;
+  if(
+    currentState.turn !==
+    myRole
+  ){
 
-        currentState.roundFinished =
-          true;
+    showError(
+      $("guessError"),
+      "Wait for your turn.",
+      "Not Your Turn"
+    );
 
-
-      } else {
-
-        currentState.turn =
-          opponentRole;
-      }
-
-
-      input.value = "";
-
-      await saveState();
-
-      return;
-    }
+    return;
+  }
 
 
-    /*
-      CRACK
-    */
+  const value =
+    $("guessInput")
+      .value
+      .trim();
 
-    const result =
-      scoreCrackGuess(
-        raw,
+
+  if(
+    !validateGuess(value)
+  )
+    return;
+
+
+  const mine =
+    currentState[
+      myRole
+    ];
+
+
+  const opponentRole =
+    myRole === "a"
+      ? "b"
+      : "a";
+
+
+  const opponent =
+    currentState[
+      opponentRole
+    ];
+
+
+  if(
+    mine.guesses.some(
+      guess =>
+        guess.value ===
+        value
+    )
+  ){
+
+    showError(
+      $("guessError"),
+      "You already tried this guess.",
+      "Duplicate Guess"
+    );
+
+    return;
+  }
+
+
+  /* DUEL */
+
+  if(
+    currentState.mode ===
+    "duel"
+  ){
+
+    mine.guesses.push({
+      value
+    });
+
+
+    const guess =
+      Number(value);
+
+
+    const secret =
+      Number(
         opponent.secret
       );
 
 
-    mine.guesses.push({
-
-      value: raw,
-
-      bulls: result.bulls,
-
-      cows: result.cows,
-
-      details: result.details
-
-    });
-
-
-    if (
-      result.bulls === 4
-    ) {
+    if(
+      guess === secret
+    ){
 
       const points =
-        calculatePoints(
+        pointsForGuess(
           mine.guesses.length
         );
 
+
       mine.roundPoints =
         points;
+
 
       mine.totalPoints +=
         points;
@@ -1803,56 +2089,103 @@
       currentState.roundWinner =
         myRole;
 
+
       currentState.roundFinished =
         true;
 
-    } else {
+    }else{
 
       currentState.turn =
         opponentRole;
     }
 
 
-    input.value = "";
+  }else{
 
-    await saveState();
+    /* CRACK */
 
+    const result =
+      scoreCrack(
+        value,
+        opponent.secret
+      );
+
+
+    mine.guesses.push({
+
+      value,
+
+      bulls:
+        result.bulls,
+
+      cows:
+        result.cows,
+
+      details:
+        result.details
+
+    });
+
+
+    if(
+      result.bulls === 4
+    ){
+
+      const points =
+        pointsForGuess(
+          mine.guesses.length
+        );
+
+
+      mine.roundPoints =
+        points;
+
+
+      mine.totalPoints +=
+        points;
+
+
+      currentState.roundWinner =
+        myRole;
+
+
+      currentState.roundFinished =
+        true;
+
+    }else{
+
+      currentState.turn =
+        opponentRole;
+    }
   }
 
 
-  function validateGuess(raw) {
-
-    if (
-      currentState.mode === "duel"
-    ) {
-
-      const number =
-        Number(raw);
-
-      if (
-        !Number.isInteger(number) ||
-        number < 1 ||
-        number > 100
-      ) {
-
-        showError(
-          guessError,
-          "Enter a whole number from 1 to 100.",
-          "Invalid Guess"
-        );
-
-        return false;
-      }
-
-      return true;
-    }
+  $("guessInput")
+    .value = "";
 
 
-    if (!/^\d{4}$/.test(raw)) {
+  await saveState();
+}
+
+
+/* =========================================================
+   GUESS VALIDATION
+========================================================= */
+
+function validateGuess(value){
+
+  if(
+    currentState.mode ===
+    "duel"
+  ){
+
+    if(
+      !/^\d+$/.test(value)
+    ){
 
       showError(
-        guessError,
-        "Enter exactly 4 digits.",
+        $("guessError"),
+        "Enter a whole number from 1 to 100.",
         "Invalid Guess"
       );
 
@@ -1860,13 +2193,18 @@
     }
 
 
-    if (
-      new Set(raw.split("")).size !== 4
-    ) {
+    const number =
+      Number(value);
+
+
+    if(
+      number < 1 ||
+      number > 100
+    ){
 
       showError(
-        guessError,
-        "All 4 digits in a Crack guess must be unique.",
+        $("guessError"),
+        "Your guess must be between 1 and 100.",
         "Invalid Guess"
       );
 
@@ -1878,441 +2216,503 @@
   }
 
 
-  /* =========================================================
-     CRACK LOGIC
-     ========================================================= */
+  if(
+    !/^\d{4}$/.test(value)
+  ){
 
-  function scoreCrackGuess(
-    guess,
-    secret
-  ) {
+    showError(
+      $("guessError"),
+      "Enter exactly 4 digits.",
+      "Invalid Guess"
+    );
 
-    let bulls = 0;
-
-    let cows = 0;
-
-    const details = [];
-
-
-    for (let i = 0; i < 4; i++) {
-
-      const digit =
-        guess[i];
-
-
-      if (
-        digit === secret[i]
-      ) {
-
-        bulls++;
-
-        details.push({
-
-          digit,
-
-          position: i + 1,
-
-          status:
-            "correct-position"
-
-        });
-
-      } else if (
-        secret.includes(digit)
-      ) {
-
-        cows++;
-
-        details.push({
-
-          digit,
-
-          position: i + 1,
-
-          status:
-            "correct-wrong-position"
-
-        });
-
-      } else {
-
-        details.push({
-
-          digit,
-
-          position: i + 1,
-
-          status:
-            "not-in-code"
-
-        });
-      }
-    }
-
-
-    return {
-      bulls,
-      cows,
-      details
-    };
+    return false;
   }
 
 
-  /* =========================================================
-     SAVE STATE
-     ========================================================= */
+  if(
+    new Set(
+      value.split("")
+    ).size !== 4
+  ){
 
-  async function saveState() {
+    showError(
+      $("guessError"),
+      "All 4 digits must be different.",
+      "Invalid Guess"
+    );
 
-    try {
-
-      const { error } =
-        await supabaseClient
-          .from("duels")
-          .update({
-
-            state: currentState,
-
-            updated_at:
-              new Date().toISOString()
-
-          })
-          .eq("code", roomCode);
+    return false;
+  }
 
 
-      if (error) {
+  return true;
+}
 
-        console.error(
-          "SAVE STATE ERROR:",
-          error
+
+/* =========================================================
+   CRACK
+========================================================= */
+
+function scoreCrack(
+  guess,
+  secret
+){
+
+  let bulls = 0;
+
+  let cows = 0;
+
+  const details = [];
+
+
+  for(
+    let i = 0;
+    i < 4;
+    i++
+  ){
+
+    const digit =
+      guess[i];
+
+
+    if(
+      digit ===
+      secret[i]
+    ){
+
+      bulls++;
+
+
+      details.push({
+
+        digit,
+
+        position:
+          i + 1,
+
+        status:
+          "correct-position"
+
+      });
+
+    }else if(
+      secret.includes(
+        digit
+      )
+    ){
+
+      cows++;
+
+
+      details.push({
+
+        digit,
+
+        position:
+          i + 1,
+
+        status:
+          "correct-wrong-position"
+
+      });
+
+    }else{
+
+      details.push({
+
+        digit,
+
+        position:
+          i + 1,
+
+        status:
+          "not-in-code"
+
+      });
+    }
+  }
+
+
+  return {
+    bulls,
+    cows,
+    details
+  };
+}
+
+
+/* =========================================================
+   SAVE STATE
+========================================================= */
+
+async function saveState(){
+
+  try{
+
+    const {error} =
+      await supabaseClient
+        .from("duels")
+        .update({
+
+          state:
+            currentState,
+
+          updated_at:
+            new Date()
+              .toISOString()
+
+        })
+        .eq(
+          "code",
+          roomCode
         );
 
-        throw error;
-      }
+
+    if(error)
+      throw error;
 
 
-      renderGame();
+    renderGame();
 
-    } catch (error) {
 
-      console.error(
-        "SAVE STATE FAILED:",
-        error
+  }catch(error){
+
+    console.error(
+      "SAVE ERROR:",
+      error
+    );
+
+
+    showError(
+      $("guessError"),
+      error,
+      "Could not update game"
+    );
+  }
+}
+
+
+/* =========================================================
+   RENDER GAME
+========================================================= */
+
+function renderGame(){
+
+  if(!currentState)
+    return;
+
+
+  currentState =
+    normalizeState(
+      currentState
+    );
+
+
+  $("gameRoomCode")
+    .textContent =
+    roomCode;
+
+
+  $("roundNumber")
+    .textContent =
+    currentState.round;
+
+
+  const mine =
+    currentState[
+      myRole
+    ];
+
+
+  const opponent =
+    currentState[
+      myRole === "a"
+        ? "b"
+        : "a"
+    ];
+
+
+  $("myScore")
+    .textContent =
+    mine.totalPoints;
+
+
+  $("opponentScore")
+    .textContent =
+    opponent.totalPoints;
+
+
+  /* FINAL */
+
+  if(
+    currentState.winner
+  ){
+
+    $("secretSection")
+      .classList.add(
+        "hidden"
       );
 
 
-      showError(
-        guessError,
-        error,
-        "Could not update game"
+    $("guessSection")
+      .classList.add(
+        "hidden"
       );
-    }
+
+
+    renderFinal();
+
+    return;
   }
 
 
-  /* =========================================================
-     RENDER GAME
-     ========================================================= */
+  /* ROUND FINISHED */
 
-  function renderGame() {
+  if(
+    currentState.roundFinished
+  ){
 
-    if (!currentState) return;
-
-
-    currentState =
-      normalizeState(currentState);
-
-
-    document
-      .getElementById("gameRoomCode")
-      .textContent =
-      roomCode;
-
-
-    document
-      .getElementById("roundNumber")
-      .textContent =
-      currentState.round;
-
-
-    const mine =
-      currentState[myRole];
-
-    const opponent =
-      currentState[
-        myRole === "a" ? "b" : "a"
-      ];
-
-
-    document
-      .getElementById("myScore")
-      .textContent =
-      mine.totalPoints;
-
-
-    document
-      .getElementById("opponentScore")
-      .textContent =
-      opponent.totalPoints;
-
-
-    const status =
-      document.getElementById(
-        "gameStatus"
-      );
-
-
-    const secretSection =
-      document.getElementById(
-        "secretSection"
-      );
-
-    const guessSection =
-      document.getElementById(
-        "guessSection"
-      );
-
-
-    /*
-      FINAL GAME
-    */
-
-    if (currentState.winner) {
-
-      secretSection.classList.add(
-        "hidden"
-      );
-
-      guessSection.classList.add(
-        "hidden"
-      );
-
-      renderFinalResult();
-
-      return;
-    }
-
-
-    /*
-      ROUND FINISHED
-    */
-
-    if (
-      currentState.roundFinished
-    ) {
-
-      secretSection.classList.add(
-        "hidden"
-      );
-
-      guessSection.classList.add(
-        "hidden"
-      );
-
-      renderRoundResult();
-
-      scheduleNextRound();
-
-      return;
-    }
-
-
-    /*
-      Waiting for both secrets.
-    */
-
-    if (
-      !currentState.a.secretSet ||
-      !currentState.b.secretSet
-    ) {
-
-      guessSection.classList.add(
-        "hidden"
-      );
-
-      secretSection.classList.remove(
+    $("secretSection")
+      .classList.add(
         "hidden"
       );
 
 
-      if (mine.secretSet) {
-
-        document
-          .getElementById("secretInput")
-          .disabled = true;
-
-        document
-          .getElementById("setSecretBtn")
-          .disabled = true;
+    $("guessSection")
+      .classList.add(
+        "hidden"
+      );
 
 
-        status.textContent =
-          "Secret saved. Waiting for opponent...";
+    renderRoundResult();
 
 
-        document
-          .getElementById("secretMessage")
-          .innerHTML = `
-            <div class="success-box">
-              ✓ Your secret is locked in.
-            </div>
-          `;
-
-      } else {
-
-        document
-          .getElementById("secretInput")
-          .disabled = false;
-
-        document
-          .getElementById("setSecretBtn")
-          .disabled = false;
+    scheduleNextRound();
 
 
-        status.textContent =
-          currentState.mode === "duel"
-            ? "Choose your secret number."
-            : "Choose your secret 4-digit code.";
-
-      }
-
-
-      return;
-    }
-
-
-    /*
-      Both secrets set.
-    */
-
-    secretSection.classList.add(
-      "hidden"
-    );
-
-    guessSection.classList.remove(
-      "hidden"
-    );
-
-
-    /*
-      Turn.
-    */
-
-    if (
-      currentState.turn === myRole
-    ) {
-
-      status.textContent =
-        "🔥 Your turn";
-
-      document
-        .getElementById("guessInput")
-        .disabled = false;
-
-      document
-        .getElementById("guessBtn")
-        .disabled = false;
-
-    } else {
-
-      status.textContent =
-        "⏳ Opponent's turn";
-
-      document
-        .getElementById("guessInput")
-        .disabled = true;
-
-      document
-        .getElementById("guessBtn")
-        .disabled = true;
-    }
-
-
-    document
-      .getElementById("guessInstruction")
-      .textContent =
-      currentState.mode === "duel"
-        ? "Guess opponent's number (1–100)"
-        : "Crack opponent's 4-digit code";
-
-
-    renderGuessHistory(
-      document.getElementById(
-        "guessHistory"
-      ),
-      mine.guesses
-    );
+    return;
   }
 
 
-  /* =========================================================
-     GUESS HISTORY
-     ========================================================= */
+  /* WAITING FOR SECRET */
 
-  function renderGuessHistory(
-    container,
+  if(
+    !currentState.a.secretSet ||
+    !currentState.b.secretSet
+  ){
+
+    $("guessSection")
+      .classList.add(
+        "hidden"
+      );
+
+
+    $("secretSection")
+      .classList.remove(
+        "hidden"
+      );
+
+
+    $("secretInstruction")
+      .textContent =
+      currentState.mode ===
+      "duel"
+        ? "Choose your secret number"
+        : "Choose your secret 4-digit code";
+
+
+    if(mine.secretSet){
+
+      $("secretInput")
+        .disabled = true;
+
+
+      $("setSecretBtn")
+        .disabled = true;
+
+
+      $("gameStatus")
+        .textContent =
+        "✓ Secret saved. Waiting for opponent…";
+
+
+      $("secretMessage")
+        .innerHTML = `
+          <div class="success-box">
+            ✓ Your secret is locked in.
+          </div>
+        `;
+
+    }else{
+
+      $("secretInput")
+        .disabled = false;
+
+
+      $("setSecretBtn")
+        .disabled = false;
+
+
+      $("gameStatus")
+        .textContent =
+        "Set your secret to start the round.";
+    }
+
+
+    return;
+  }
+
+
+  /* BOTH READY */
+
+  $("secretSection")
+    .classList.add(
+      "hidden"
+    );
+
+
+  $("guessSection")
+    .classList.remove(
+      "hidden"
+    );
+
+
+  $("guessInstruction")
+    .textContent =
+    currentState.mode ===
+    "duel"
+      ? "Guess opponent's number (1–100)"
+      : "Crack opponent's 4-digit code";
+
+
+  if(
+    currentState.turn ===
+    myRole
+  ){
+
+    $("gameStatus")
+      .textContent =
+      "🔥 Your turn";
+
+
+    $("guessInput")
+      .disabled = false;
+
+
+    $("guessBtn")
+      .disabled = false;
+
+  }else{
+
+    $("gameStatus")
+      .textContent =
+      "⏳ Opponent's turn";
+
+
+    $("guessInput")
+      .disabled = true;
+
+
+    $("guessBtn")
+      .disabled = true;
+  }
+
+
+  /*
+    Only YOUR guesses are shown.
+  */
+
+  renderHistory(
+    $("guessHistory"),
+    mine.guesses
+  );
+}
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+function renderHistory(
+  container,
+  guesses
+){
+
+  if(!guesses.length){
+
+    container.innerHTML = `
+      <div class="small-note">
+        Your guesses will appear here.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  const opponentRole =
+    myRole === "a"
+      ? "b"
+      : "a";
+
+
+  const secret =
+    currentState[
+      opponentRole
+    ].secret;
+
+
+  container.innerHTML =
     guesses
-  ) {
+      .slice()
+      .reverse()
+      .map(
+        (guess,index) => {
 
-    if (!guesses.length) {
+          /* =========================
+             DUEL
+          ========================= */
 
-      container.innerHTML = `
-        <div class="small-note">
-          Your guesses will appear here.
-        </div>
-      `;
-
-      return;
-    }
-
-
-    /*
-      IMPORTANT:
-      ONLY YOUR guesses are rendered.
-      Opponent guesses remain hidden.
-    */
-
-    container.innerHTML =
-      guesses
-        .slice()
-        .reverse()
-        .map((guess, index) => {
-
-          if (
-            currentState.mode === "duel"
-          ) {
-
-            const opponentRole =
-              myRole === "a"
-                ? "b"
-                : "a";
-
-            const secret =
-              Number(
-                currentState[
-                  opponentRole
-                ].secret
-              );
+          if(
+            currentState.mode ===
+            "duel"
+          ){
 
             const value =
-              Number(guess.value);
+              Number(
+                guess.value
+              );
 
 
-            let result = "";
+            const target =
+              Number(secret);
 
-            if (value < secret) {
+
+            let result;
+
+
+            /*
+              IMPORTANT:
+              Lower number = tell user "Upper"
+              Higher number = tell user "Lower"
+            */
+
+            if(
+              value < target
+            ){
 
               result =
-                "📈 Too low";
+                "⬆️ Upper";
 
-            } else if (
-              value > secret
-            ) {
+            }else if(
+              value > target
+            ){
 
               result =
-                "📉 Too high";
+                "⬇️ Lower";
 
-            } else {
+            }else{
 
               result =
                 "🎯 Correct";
@@ -2323,9 +2723,11 @@
               <div class="guess-item">
 
                 <div class="guess-top">
+
                   <span>
-                    Guess #${
-                      guesses.length - index
+                    Guess ${
+                      guesses.length -
+                      index
                     }
                   </span>
 
@@ -2334,7 +2736,9 @@
                       guess.value
                     )}
                   </strong>
+
                 </div>
+
 
                 <div class="guess-result">
                   ${result}
@@ -2342,9 +2746,12 @@
 
               </div>
             `;
-
           }
 
+
+          /* =========================
+             CRACK
+          ========================= */
 
           const details =
             Array.isArray(
@@ -2360,8 +2767,9 @@
               <div class="guess-top">
 
                 <span>
-                  Guess #${
-                    guesses.length - index
+                  Guess ${
+                    guesses.length -
+                    index
                   }
                 </span>
 
@@ -2373,438 +2781,461 @@
 
               </div>
 
+
               <div class="guess-result">
-                ${guess.bulls} correct position
+
+                ${guess.bulls}
+                correct position
+
                 •
-                ${guess.cows} correct digit, wrong position
+
+                ${guess.cows}
+                correct digit, wrong position
+
               </div>
+
 
               <div class="feedback-list">
 
                 ${
-                  details.map(item => {
+                  details
+                    .map(
+                      item => {
 
-                    if (
-                      item.status ===
-                      "correct-position"
-                    ) {
+                        if(
+                          item.status ===
+                          "correct-position"
+                        ){
 
-                      return `
-                        <div class="feedback-digit correct-position">
-                          ${escapeHtml(item.digit)}
-                          ✓ Correct digit • Correct position
-                        </div>
-                      `;
+                          return `
+                            <div class="feedback-digit correct-position">
 
-                    }
+                              ${escapeHtml(
+                                item.digit
+                              )}
 
+                              ✓ Correct digit
+                              •
+                              Correct position
 
-                    if (
-                      item.status ===
-                      "correct-wrong-position"
-                    ) {
-
-                      return `
-                        <div class="feedback-digit wrong-position">
-                          ${escapeHtml(item.digit)}
-                          ✓ Correct digit • Wrong position
-                        </div>
-                      `;
-
-                    }
+                            </div>
+                          `;
+                        }
 
 
-                    return `
-                      <div class="feedback-digit not-found">
-                        ${escapeHtml(item.digit)}
-                        ✕ Not in code
-                      </div>
-                    `;
+                        if(
+                          item.status ===
+                          "correct-wrong-position"
+                        ){
 
-                  }).join("")
+                          return `
+                            <div class="feedback-digit wrong-position">
+
+                              ${escapeHtml(
+                                item.digit
+                              )}
+
+                              ✓ Correct digit
+                              •
+                              Wrong position
+
+                            </div>
+                          `;
+                        }
+
+
+                        return `
+                          <div class="feedback-digit not-found">
+
+                            ${escapeHtml(
+                              item.digit
+                            )}
+
+                            ✕ Not in code
+
+                          </div>
+                        `;
+                      }
+                    )
+                    .join("")
                 }
 
               </div>
 
             </div>
           `;
-
-        })
-        .join("");
-  }
-
-
-  /* =========================================================
-     ROUND RESULT
-     ========================================================= */
-
-  function renderRoundResult() {
-
-    const box =
-      document.getElementById(
-        "roundResult"
-      );
+        }
+      )
+      .join("");
+}
 
 
-    const winner =
-      currentState.roundWinner;
+/* =========================================================
+   ROUND RESULT
+========================================================= */
+
+function renderRoundResult(){
+
+  const winner =
+    currentState.roundWinner;
 
 
-    const points =
-      currentState[
-        winner
-      ].roundPoints;
+  const winnerPlayer =
+    currentState[
+      winner
+    ];
 
 
-    let title;
+  const isMe =
+    winner ===
+    myRole;
 
 
-    if (winner === myRole) {
+  $("roundResult")
+    .innerHTML = `
 
-      title =
-        "🎉 You won the round!";
-
-    } else {
-
-      title =
-        "😮 Opponent won the round";
-
-    }
-
-
-    box.innerHTML = `
       <div class="result-box">
 
         <div class="result-title">
-          ${title}
+
+          ${
+            isMe
+              ? "🎉 You won the round!"
+              : "😮 Opponent won the round"
+          }
+
         </div>
 
+
         <div class="result-points">
-          ${points} points earned by
+
           ${
-            winner === myRole
-              ? "you"
-              : "your opponent"
+            winnerPlayer.roundPoints
           }
+
+          points earned
+
         </div>
 
       </div>
     `;
+}
+
+
+/* =========================================================
+   NEXT ROUND
+========================================================= */
+
+function scheduleNextRound(){
+
+  const key =
+    `${currentState.round}:${currentState.roundWinner}`;
+
+
+  if(
+    transitionKey ===
+    key
+  )
+    return;
+
+
+  transitionKey =
+    key;
+
+
+  if(nextRoundTimer){
+
+    clearTimeout(
+      nextRoundTimer
+    );
   }
 
 
-  /* =========================================================
-     NEXT ROUND
-     ========================================================= */
-
-  function scheduleNextRound() {
-
-    const key =
-      `${currentState.round}-${currentState.roundWinner}`;
+  nextRoundTimer =
+    setTimeout(
+      startNextRound,
+      2500
+    );
+}
 
 
-    if (
-      transitionKey === key
-    ) {
+async function startNextRound(){
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("duels")
+        .select("*")
+        .eq(
+          "code",
+          roomCode
+        )
+        .maybeSingle();
+
+
+    if(error)
+      throw error;
+
+
+    if(!data)
+      return;
+
+
+    const state =
+      normalizeState(
+        data.state
+      );
+
+
+    if(
+      state.round !==
+      currentState.round
+    ){
+
+      currentState =
+        state;
+
+
+      renderGame();
+
 
       return;
     }
 
 
-    transitionKey = key;
+    /*
+      Final round.
+    */
 
+    if(
+      state.round >=
+      TOTAL_ROUNDS
+    ){
 
-    if (nextRoundTimer) {
-
-      clearTimeout(
-        nextRoundTimer
+      await finishGame(
+        state
       );
+
+      return;
     }
 
 
-    nextRoundTimer =
-      setTimeout(
-        startNextRound,
-        3500
-      );
-  }
+    if(
+      !state.roundFinished
+    )
+      return;
 
 
-  async function startNextRound() {
+    /*
+      Start next round.
+    */
 
-    try {
+    state.round++;
 
-      /*
-        Re-fetch the latest state before
-        changing the round.
-      */
+    state.turn =
+      "a";
 
-      const { data, error } =
-        await supabaseClient
-          .from("duels")
-          .select("*")
-          .eq("code", roomCode)
-          .maybeSingle();
-
-
-      if (error) {
-
-        throw error;
-      }
-
-
-      if (!data) return;
-
-
-      const latest =
-        normalizeState(
-          data.state
-        );
-
-
-      /*
-        Someone already moved the game
-        forward.
-      */
-
-      if (
-        latest.round !== currentState.round
-      ) {
-
-        currentState =
-          latest;
-
-        renderGame();
-
-        return;
-      }
-
-
-      /*
-        Final round.
-      */
-
-      if (
-        latest.round >= TOTAL_ROUNDS
-      ) {
-
-        finishGame(
-          latest
-        );
-
-        return;
-      }
-
-
-      if (
-        !latest.roundFinished
-      ) {
-
-        return;
-      }
-
-
-      latest.round++;
-
-      latest.turn =
-        "a";
-
-      latest.roundWinner =
-        null;
-
-      latest.roundFinished =
-        false;
-
-      latest.a.secret =
-        null;
-
-      latest.a.secretSet =
-        false;
-
-      latest.a.guesses =
-        [];
-
-      latest.a.roundPoints =
-        0;
-
-      latest.b.secret =
-        null;
-
-      latest.b.secretSet =
-        false;
-
-      latest.b.guesses =
-        [];
-
-      latest.b.roundPoints =
-        0;
-
-
-      const {
-        data: updated,
-        error: updateError
-      } =
-        await supabaseClient
-          .from("duels")
-          .update({
-
-            state: latest,
-
-            updated_at:
-              new Date().toISOString()
-
-          })
-          .eq("code", roomCode)
-          .select()
-          .single();
-
-
-      if (updateError) {
-
-        throw updateError;
-      }
-
-
-      currentState =
-        normalizeState(
-          updated.state
-        );
-
-
-      transitionKey =
-        null;
-
-
-      renderGame();
-
-
-    } catch (error) {
-
-      console.error(
-        "NEXT ROUND ERROR:",
-        error
-      );
-
-      showError(
-        document.getElementById(
-          "roundResult"
-        ),
-        error,
-        "Could not start next round"
-      );
-    }
-  }
-
-
-  /* =========================================================
-     FINISH GAME
-     ========================================================= */
-
-  async function finishGame(state) {
-
-    const aScore =
-      state.a.totalPoints;
-
-    const bScore =
-      state.b.totalPoints;
-
-
-    if (aScore === bScore) {
-
-      state.winner =
-        "draw";
-
-    } else {
-
-      state.winner =
-        aScore > bScore
-          ? "a"
-          : "b";
-    }
-
+    state.roundWinner =
+      null;
 
     state.roundFinished =
-      true;
+      false;
 
 
-    try {
+    /*
+      Reset round-only values.
+      Keep total score.
+    */
 
-      const { error } =
-        await supabaseClient
-          .from("duels")
-          .update({
+    for(
+      const role of [
+        "a",
+        "b"
+      ]
+    ){
 
-            state,
+      state[role].secret =
+        null;
 
-            updated_at:
-              new Date().toISOString()
+      state[role].secretSet =
+        false;
 
-          })
-          .eq("code", roomCode);
+      state[role].guesses =
+        [];
 
-
-      if (error) {
-
-        throw error;
-      }
-
-
-      currentState =
-        state;
-
-      renderGame();
-
-    } catch (error) {
-
-      console.error(
-        "FINISH GAME ERROR:",
-        error
-      );
-
-      showError(
-        document.getElementById(
-          "finalResult"
-        ),
-        error,
-        "Could not finish game"
-      );
+      state[role].roundPoints =
+        0;
     }
+
+
+    const {
+      data:updated,
+      error:updateError
+    } =
+      await supabaseClient
+        .from("duels")
+        .update({
+
+          state,
+
+          updated_at:
+            new Date()
+              .toISOString()
+
+        })
+        .eq(
+          "code",
+          roomCode
+        )
+        .select()
+        .single();
+
+
+    if(updateError)
+      throw updateError;
+
+
+    currentState =
+      normalizeState(
+        updated.state
+      );
+
+
+    transitionKey =
+      "";
+
+
+    renderGame();
+
+
+  }catch(error){
+
+    console.error(
+      "NEXT ROUND ERROR:",
+      error
+    );
+
+
+    showError(
+      $("roundResult"),
+      error,
+      "Could not start next round"
+    );
+  }
+}
+
+
+/* =========================================================
+   FINISH GAME
+========================================================= */
+
+async function finishGame(state){
+
+  const a =
+    state.a.totalPoints;
+
+
+  const b =
+    state.b.totalPoints;
+
+
+  if(a === b){
+
+    state.winner =
+      "draw";
+
+  }else{
+
+    state.winner =
+      a > b
+        ? "a"
+        : "b";
   }
 
 
-  /* =========================================================
-     FINAL RESULT
-     ========================================================= */
+  state.roundFinished =
+    true;
 
-  function renderFinalResult() {
 
-    const box =
-      document.getElementById(
-        "finalResult"
+  const {error} =
+    await supabaseClient
+      .from("duels")
+      .update({
+
+        state,
+
+        updated_at:
+          new Date()
+            .toISOString()
+
+      })
+      .eq(
+        "code",
+        roomCode
       );
 
 
-    const aScore =
-      currentState.a.totalPoints;
+  if(error){
 
-    const bScore =
-      currentState.b.totalPoints;
+    showError(
+      $("finalResult"),
+      error,
+      "Could not finish game"
+    );
+
+    return;
+  }
 
 
-    if (
-      currentState.winner === "draw"
-    ) {
+  currentState =
+    state;
 
-      box.innerHTML = `
+
+  renderGame();
+}
+
+
+/* =========================================================
+   FINAL RESULT
+========================================================= */
+
+function renderFinal(){
+
+  const a =
+    currentState.a.totalPoints;
+
+
+  const b =
+    currentState.b.totalPoints;
+
+
+  /*
+    DRAW
+  */
+
+  if(
+    currentState.winner ===
+    "draw"
+  ){
+
+    $("finalResult")
+      .innerHTML = `
+
         <div class="winner-box">
 
           <div class="winner-title">
             🤝 Game Draw
           </div>
 
+
           <div class="winner-score">
-            ${aScore} - ${bScore}
+            ${a} - ${b}
           </div>
+
 
           <div class="result-points">
             Both players finished with the same score.
@@ -2813,188 +3244,243 @@
         </div>
       `;
 
-      return;
-    }
-
-
-    if (
-      currentState.winner === myRole
-    ) {
-
-      box.innerHTML = `
-        <div class="winner-box">
-
-          <div class="winner-title">
-            🏆 You Won!
-          </div>
-
-          <div class="winner-score">
-            ${aScore} - ${bScore}
-          </div>
-
-        </div>
-      `;
-
-    } else {
-
-      box.innerHTML = `
-        <div class="winner-box">
-
-          <div class="winner-title">
-            😮 Opponent Won
-          </div>
-
-          <div class="winner-score">
-            ${aScore} - ${bScore}
-          </div>
-
-        </div>
-      `;
-    }
+    return;
   }
 
 
-  /* =========================================================
-     LEAVE GAME
-     ========================================================= */
-
-  document
-    .getElementById("cancelRoomBtn")
-    .addEventListener(
-      "click",
-      leaveGame
-    );
+  const won =
+    currentState.winner ===
+    myRole;
 
 
-  document
-    .getElementById("leaveGameBtn")
-    .addEventListener(
-      "click",
-      leaveGame
-    );
+  $("finalResult")
+    .innerHTML = `
+
+      <div class="winner-box">
+
+        <div class="winner-title">
+
+          ${
+            won
+              ? "🏆 You Won!"
+              : "😮 Opponent Won"
+          }
+
+        </div>
 
 
-  async function leaveGame() {
+        <div class="winner-score">
+          ${a} - ${b}
+        </div>
 
-    if (realtimeChannel) {
-
-      await supabaseClient
-        .removeChannel(
-          realtimeChannel
-        );
-
-      realtimeChannel =
-        null;
-    }
+      </div>
+    `;
+}
 
 
-    if (nextRoundTimer) {
+/* =========================================================
+   LEAVE
+========================================================= */
 
-      clearTimeout(
-        nextRoundTimer
+$("cancelRoomBtn")
+.addEventListener(
+  "click",
+  leaveGame
+);
+
+
+$("leaveGameBtn")
+.addEventListener(
+  "click",
+  leaveGame
+);
+
+
+async function leaveGame(){
+
+  if(realtimeChannel){
+
+    await supabaseClient
+      .removeChannel(
+        realtimeChannel
       );
 
-      nextRoundTimer =
-        null;
-    }
-
-
-    roomCode = null;
-
-    myRole = null;
-
-    currentState = null;
-
-    transitionKey = null;
-
-
-    document
-      .getElementById("joinCodeInput")
-      .value = "";
-
-    document
-      .getElementById("secretInput")
-      .value = "";
-
-    document
-      .getElementById("guessInput")
-      .value = "";
-
-
-    clearError(homeError);
-
-    clearError(joinError);
-
-    clearError(waitingError);
-
-    showScreen(homeScreen);
+    realtimeChannel =
+      null;
   }
 
 
-  /* =========================================================
-     KEYBOARD ENTER
-     ========================================================= */
+  if(nextRoundTimer){
 
-  document
-    .getElementById("secretInput")
-    .addEventListener(
-      "keydown",
-      event => {
-
-        if (
-          event.key === "Enter"
-        ) {
-
-          setSecret();
-        }
-      }
+    clearTimeout(
+      nextRoundTimer
     );
 
-
-  document
-    .getElementById("guessInput")
-    .addEventListener(
-      "keydown",
-      event => {
-
-        if (
-          event.key === "Enter"
-        ) {
-
-          makeGuess();
-        }
-      }
-    );
+    nextRoundTimer =
+      null;
+  }
 
 
-  document
-    .getElementById("joinCodeInput")
-    .addEventListener(
-      "keydown",
-      event => {
+  roomCode =
+    "";
 
-        if (
-          event.key === "Enter"
-        ) {
+  myRole =
+    "";
 
-          joinRoom();
-        }
-      }
-    );
+  currentState =
+    null;
+
+  transitionKey =
+    "";
 
 
-  /* =========================================================
-     STARTUP TEST
-     ========================================================= */
+  $("joinCodeInput")
+    .value = "";
 
-  console.log(
-    "Number Duel loaded."
+
+  $("secretInput")
+    .value = "";
+
+
+  $("guessInput")
+    .value = "";
+
+
+  clearError(
+    $("homeError")
   );
 
-  console.log(
-    "Supabase URL:",
-    SUPABASE_URL
+
+  clearError(
+    $("joinError")
   );
+
+
+  clearError(
+    $("waitingError")
+  );
+
+
+  $("joinCard")
+    .classList.add(
+      "hidden"
+    );
+
+
+  showScreen(
+    $("homeScreen")
+  );
+}
+
+
+/* =========================================================
+   ENTER KEY
+========================================================= */
+
+$("joinCodeInput")
+.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key ===
+      "Enter"
+    ){
+
+      joinRoom();
+    }
+  }
+);
+
+
+$("secretInput")
+.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key ===
+      "Enter"
+    ){
+
+      setSecret();
+    }
+  }
+);
+
+
+$("guessInput")
+.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key ===
+      "Enter"
+    ){
+
+      makeGuess();
+    }
+  }
+);
+
+
+/* =========================================================
+   INPUT MODE
+========================================================= */
+
+function updateInputMode(){
+
+  if(
+    selectedMode ===
+    "duel"
+  ){
+
+    $("secretInput")
+      .maxLength = 3;
+
+    $("secretInput")
+      .placeholder =
+      "1–100";
+
+
+    $("guessInput")
+      .maxLength = 3;
+
+    $("guessInput")
+      .placeholder =
+      "Your guess";
+
+  }else{
+
+    $("secretInput")
+      .maxLength = 4;
+
+    $("secretInput")
+      .placeholder =
+      "4 unique digits";
+
+
+    $("guessInput")
+      .maxLength = 4;
+
+    $("guessInput")
+      .placeholder =
+      "4 unique digits";
+  }
+}
+
+
+/* =========================================================
+   INITIAL UI
+   NO SUPABASE REQUEST
+========================================================= */
+
+updateInputMode();
+
+console.log(
+  "Number Duel ready."
+);
 
 </script>
 
