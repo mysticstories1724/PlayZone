@@ -301,16 +301,22 @@
   const SUPABASE_ANON_KEY = 'sb_publishable_FGT-Tw77u5BTy4zxbqwiHA_bmndBToE';
   // ---------------------------------------------------------------
 ​
-  if (!SUPABASE_URL.startsWith('http') || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY'){
-    document.getElementById('app').innerHTML =
-      '<div class="setup-missing"><strong>Setup needed.</strong><br><br>' +
-      'Open this file and replace <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> near the top of the ' +
-      '&lt;script&gt; tag with the values from your Supabase project (Settings &rarr; API). ' +
-      'Also run <code>supabase-schema.sql</code> in the Supabase SQL editor first.</div>';
-    return;
+  // Set up Supabase without letting a failure here block the rest of the
+  // page — navigation between screens should still work even if the
+  // backend can't be reached, and we show a clear message instead.
+  let supabase = null;
+  let supabaseError = null;
+  try {
+    if (typeof window.supabase === 'undefined'){
+      throw new Error('The Supabase library did not load. Check your internet connection, then reload the page.');
+    }
+    if (!SUPABASE_URL.startsWith('http') || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY'){
+      throw new Error('Supabase is not configured yet. Add your Project URL and anon key near the top of the script.');
+    }
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch (e){
+    supabaseError = e.message;
   }
-​
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 ​
   const LOW = 1, HIGH = 100;
   let currentCode = null;
@@ -336,6 +342,15 @@
     screens[name].classList.add('active');
   }
 ​
+  if (supabaseError){
+    const banner = document.createElement('div');
+    banner.className = 'setup-missing';
+    banner.style.marginBottom = '20px';
+    banner.innerHTML = '<strong>Heads up —</strong><br><br>' + supabaseError +
+      '<br><br>You can still browse the screens, but creating or joining a game won\u2019t work until this is fixed.';
+    document.getElementById('app').insertBefore(banner, document.getElementById('app').firstChild);
+  }
+​
   document.querySelectorAll('[data-back]').forEach(el => {
     el.addEventListener('click', () => {
       stopPolling();
@@ -353,22 +368,37 @@
   }
 ​
   async function fetchState(code){
-    const { data, error } = await supabase.from('duels').select('state').eq('code', code).maybeSingle();
-    if (error || !data) return null;
-    return data.state;
+    if (!supabase) return null;
+    try {
+      const { data, error } = await supabase.from('duels').select('state').eq('code', code).maybeSingle();
+      if (error || !data) return null;
+      return data.state;
+    } catch (e){
+      return null;
+    }
   }
 ​
   async function insertGame(code, state){
-    const { error } = await supabase.from('duels').insert({ code, state });
-    return !error;
+    if (!supabase) return false;
+    try {
+      const { error } = await supabase.from('duels').insert({ code, state });
+      return !error;
+    } catch (e){
+      return false;
+    }
   }
 ​
   async function updateGame(code, state){
-    const { error } = await supabase
-      .from('duels')
-      .update({ state, updated_at: new Date().toISOString() })
-      .eq('code', code);
-    return !error;
+    if (!supabase) return false;
+    try {
+      const { error } = await supabase
+        .from('duels')
+        .update({ state, updated_at: new Date().toISOString() })
+        .eq('code', code);
+      return !error;
+    } catch (e){
+      return false;
+    }
   }
 ​
   async function generateUniqueCode(){
