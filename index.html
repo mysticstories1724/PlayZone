@@ -425,11 +425,13 @@
   <!-- MODE SELECT -->
   <div class="screen active" id="screen-mode">
     <h1>Pick a game</h1>
+
     <p class="sub">
       Two players, two ways to play. Choose which one.
     </p>
 
     <div class="choice-row">
+
       <button class="choice-btn" id="toDuelMode">
         <span class="big">Duel</span>
         Guess each other's number
@@ -439,8 +441,10 @@
         <span class="big">Crack</span>
         Guess the system's code
       </button>
+
     </div>
   </div>
+
 
   <!-- DUEL LANDING -->
   <div class="screen" id="screen-duel-landing">
@@ -472,6 +476,7 @@
     </div>
   </div>
 
+
   <!-- HOST SETUP -->
   <div class="screen" id="screen-host-setup">
 
@@ -487,6 +492,7 @@
     </p>
 
     <div class="field">
+
       <label for="hostSecretInput">
         Your secret number (1-100)
       </label>
@@ -498,6 +504,7 @@
         max="100"
         placeholder="e.g. 42"
       >
+
     </div>
 
     <div class="error-text" id="hostError"></div>
@@ -507,6 +514,7 @@
     </button>
 
   </div>
+
 
   <!-- HOST WAITING -->
   <div class="screen" id="screen-host-watch">
@@ -522,8 +530,15 @@
     <div class="card">
 
       <div class="code-display">
-        <div class="label">GAME CODE</div>
-        <div class="code" id="hostCodeDisplay">0000</div>
+
+        <div class="label">
+          GAME CODE
+        </div>
+
+        <div class="code" id="hostCodeDisplay">
+          0000
+        </div>
+
       </div>
 
       <div class="status-line" id="hostWaitStatus">
@@ -532,6 +547,7 @@
 
     </div>
   </div>
+
 
   <!-- JOIN SETUP -->
   <div class="screen" id="screen-join-setup">
@@ -570,6 +586,7 @@
 
   </div>
 
+
   <!-- JOIN SECRET -->
   <div class="screen" id="screen-join-secret">
 
@@ -604,20 +621,26 @@
 
   </div>
 
+
   <!-- DUEL PLAY -->
   <div class="screen" id="screen-duel">
 
     <h1>Number duel</h1>
 
     <div class="turn-row">
+
       <span class="turn-badge" id="turnBadge">
         Checking turn...
       </span>
+
     </div>
 
     <div class="range-row">
+
       <span id="lowBound">1</span>
+
       <span id="highBound">100</span>
+
     </div>
 
     <div class="card">
@@ -667,6 +690,7 @@
 
   </div>
 
+
   <!-- CODEBREAKER LANDING -->
   <div class="screen" id="screen-cb-landing">
 
@@ -699,6 +723,7 @@
 
   </div>
 
+
   <!-- CODEBREAKER HOST WAITING -->
   <div class="screen" id="screen-cb-host-watch">
 
@@ -714,7 +739,9 @@
 
       <div class="code-display">
 
-        <div class="label">ROOM CODE</div>
+        <div class="label">
+          ROOM CODE
+        </div>
 
         <div class="code" id="cbHostCodeDisplay">
           0000
@@ -729,6 +756,7 @@
     </div>
 
   </div>
+
 
   <!-- CODEBREAKER JOIN -->
   <div class="screen" id="screen-cb-join">
@@ -767,15 +795,18 @@
 
   </div>
 
+
   <!-- CODEBREAKER PLAY -->
   <div class="screen" id="screen-cb-play">
 
     <h1>Crack the code</h1>
 
     <div class="turn-row">
+
       <span class="turn-badge" id="cbTurnBadge">
         Checking turn...
       </span>
+
     </div>
 
     <div class="card">
@@ -810,17 +841,12 @@
 
     </div>
 
+    <!-- ONLY YOUR GUESSES ARE SHOWN -->
     <div class="section-label">
       Your guesses
     </div>
 
     <div id="cbMyHistory"></div>
-
-    <div class="section-label">
-      Opponent's guesses
-    </div>
-
-    <div id="cbOppHistory"></div>
 
     <button
       class="ghost"
@@ -834,22 +860,30 @@
 
 </div>
 
+
 <script>
 window.addEventListener('error', function (e) {
 
   try {
 
-    const app = document.getElementById('app');
+    const app =
+      document.getElementById('app');
 
     if (!app) {
       return;
     }
 
-    const div = document.createElement('div');
+    const div =
+      document.createElement('div');
 
-    div.className = 'setup-missing';
-    div.style.marginBottom = '20px';
-    div.style.borderColor = '#b0493f';
+    div.className =
+      'setup-missing';
+
+    div.style.marginBottom =
+      '20px';
+
+    div.style.borderColor =
+      '#b0493f';
 
     div.innerHTML =
       '<strong>Something broke on this page:</strong><br><br>' +
@@ -857,7 +891,10 @@ window.addEventListener('error', function (e) {
       '<br><br>(line ' + e.lineno + ')' +
       '<br><br>Send this message back so it can be fixed.';
 
-    app.insertBefore(div, app.firstChild);
+    app.insertBefore(
+      div,
+      app.firstChild
+    );
 
   } catch (err) {
     // Ignore secondary errors
@@ -865,6 +902,7 @@ window.addEventListener('error', function (e) {
 
 });
 </script>
+
 
 <script>
 (function () {
@@ -884,19 +922,27 @@ window.addEventListener('error', function (e) {
 
   try {
 
-    if (typeof window.supabase === 'undefined') {
+    if (
+      typeof window.supabase ===
+      'undefined'
+    ) {
+
       throw new Error(
         'The Supabase library did not load. Check your internet connection, then reload the page.'
       );
+
     }
 
     if (
       !SUPABASE_URL.startsWith('http') ||
-      SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY'
+      SUPABASE_ANON_KEY ===
+      'YOUR_SUPABASE_ANON_KEY'
     ) {
+
       throw new Error(
         'Supabase is not configured yet. Add your Project URL and anon key near the top of the script.'
       );
+
     }
 
     supabase =
@@ -907,7 +953,8 @@ window.addEventListener('error', function (e) {
 
   } catch (e) {
 
-    supabaseError = e.message;
+    supabaseError =
+      e.message;
 
   }
 
@@ -931,48 +978,80 @@ window.addEventListener('error', function (e) {
   const screens = {
 
     mode:
-      document.getElementById('screen-mode'),
+      document.getElementById(
+        'screen-mode'
+      ),
 
     duelLanding:
-      document.getElementById('screen-duel-landing'),
+      document.getElementById(
+        'screen-duel-landing'
+      ),
 
     hostSetup:
-      document.getElementById('screen-host-setup'),
+      document.getElementById(
+        'screen-host-setup'
+      ),
 
     hostWatch:
-      document.getElementById('screen-host-watch'),
+      document.getElementById(
+        'screen-host-watch'
+      ),
 
     joinSetup:
-      document.getElementById('screen-join-setup'),
+      document.getElementById(
+        'screen-join-setup'
+      ),
 
     joinSecret:
-      document.getElementById('screen-join-secret'),
+      document.getElementById(
+        'screen-join-secret'
+      ),
 
     duel:
-      document.getElementById('screen-duel'),
+      document.getElementById(
+        'screen-duel'
+      ),
 
     cbLanding:
-      document.getElementById('screen-cb-landing'),
+      document.getElementById(
+        'screen-cb-landing'
+      ),
 
     cbHostWatch:
-      document.getElementById('screen-cb-host-watch'),
+      document.getElementById(
+        'screen-cb-host-watch'
+      ),
 
     cbJoin:
-      document.getElementById('screen-cb-join'),
+      document.getElementById(
+        'screen-cb-join'
+      ),
 
     cbPlay:
-      document.getElementById('screen-cb-play')
+      document.getElementById(
+        'screen-cb-play'
+      )
 
   };
 
 
   function show(name) {
 
-    Object.values(screens).forEach(function (screen) {
-      screen.classList.remove('active');
-    });
+    Object.values(
+      screens
+    ).forEach(
+      function (screen) {
 
-    screens[name].classList.add('active');
+        screen.classList.remove(
+          'active'
+        );
+
+      }
+    );
+
+    screens[name].classList.add(
+      'active'
+    );
 
   }
 
@@ -984,10 +1063,15 @@ window.addEventListener('error', function (e) {
   if (supabaseError) {
 
     const banner =
-      document.createElement('div');
+      document.createElement(
+        'div'
+      );
 
-    banner.className = 'setup-missing';
-    banner.style.marginBottom = '20px';
+    banner.className =
+      'setup-missing';
+
+    banner.style.marginBottom =
+      '20px';
 
     banner.innerHTML =
       '<strong>Heads up —</strong><br><br>' +
@@ -999,7 +1083,9 @@ window.addEventListener('error', function (e) {
       .getElementById('app')
       .insertBefore(
         banner,
-        document.getElementById('app').firstChild
+        document.getElementById(
+          'app'
+        ).firstChild
       );
 
   }
@@ -1011,47 +1097,76 @@ window.addEventListener('error', function (e) {
 
   document
     .querySelectorAll('[data-back]')
-    .forEach(function (el) {
+    .forEach(
+      function (el) {
 
-      el.addEventListener('click', function () {
+        el.addEventListener(
+          'click',
+          function () {
 
-        stopPolling();
+            stopPolling();
 
-        show(
-          el.getAttribute('data-back')
+            show(
+              el.getAttribute(
+                'data-back'
+              )
+            );
+
+          }
         );
 
-      });
-
-    });
+      }
+    );
 
 
   document
     .getElementById('toHost')
-    .addEventListener('click', function () {
-      show('hostSetup');
-    });
+    .addEventListener(
+      'click',
+      function () {
+
+        show('hostSetup');
+
+      }
+    );
 
 
   document
     .getElementById('toJoin')
-    .addEventListener('click', function () {
-      show('joinSetup');
-    });
+    .addEventListener(
+      'click',
+      function () {
+
+        show('joinSetup');
+
+      }
+    );
 
 
   document
     .getElementById('toDuelMode')
-    .addEventListener('click', function () {
-      show('duelLanding');
-    });
+    .addEventListener(
+      'click',
+      function () {
+
+        show('duelLanding');
+
+      }
+    );
 
 
   document
-    .getElementById('toCodebreakerMode')
-    .addEventListener('click', function () {
-      show('cbLanding');
-    });
+    .getElementById(
+      'toCodebreakerMode'
+    )
+    .addEventListener(
+      'click',
+      function () {
+
+        show('cbLanding');
+
+      }
+    );
 
 
   /* =========================
@@ -1062,7 +1177,9 @@ window.addEventListener('error', function (e) {
 
     return String(
       Math.floor(
-        1000 + Math.random() * 9000
+        1000 +
+        Math.random() *
+        9000
       )
     );
 
@@ -1084,8 +1201,13 @@ window.addEventListener('error', function (e) {
           .eq('code', code)
           .maybeSingle();
 
-      if (result.error || !result.data) {
+      if (
+        result.error ||
+        !result.data
+      ) {
+
         return null;
+
       }
 
       return result.data.state;
@@ -1099,7 +1221,10 @@ window.addEventListener('error', function (e) {
   }
 
 
-  async function insertGame(code, state) {
+  async function insertGame(
+    code,
+    state
+  ) {
 
     if (!supabase) {
       return false;
@@ -1126,7 +1251,10 @@ window.addEventListener('error', function (e) {
   }
 
 
-  async function updateGame(code, state) {
+  async function updateGame(
+    code,
+    state
+  ) {
 
     if (!supabase) {
       return false;
@@ -1139,7 +1267,8 @@ window.addEventListener('error', function (e) {
           .from('duels')
           .update({
             state: state,
-            updated_at: new Date().toISOString()
+            updated_at:
+              new Date().toISOString()
           })
           .eq('code', code);
 
@@ -1156,7 +1285,9 @@ window.addEventListener('error', function (e) {
 
   async function generateUniqueCode() {
 
-    let code = randomCode();
+    let code =
+      randomCode();
+
     let tries = 0;
 
     while (
@@ -1164,7 +1295,9 @@ window.addEventListener('error', function (e) {
       tries < 15
     ) {
 
-      code = randomCode();
+      code =
+        randomCode();
+
       tries++;
 
     }
@@ -1178,7 +1311,10 @@ window.addEventListener('error', function (e) {
 
     if (pollTimer) {
 
-      clearInterval(pollTimer);
+      clearInterval(
+        pollTimer
+      );
+
       pollTimer = null;
 
     }
@@ -1186,23 +1322,31 @@ window.addEventListener('error', function (e) {
   }
 
 
-  function pollGame(code, onChange) {
+  function pollGame(
+    code,
+    onChange
+  ) {
 
     stopPolling();
 
-    pollTimer = setInterval(
-      async function () {
+    pollTimer =
+      setInterval(
+        async function () {
 
-        const state =
-          await fetchState(code);
+          const state =
+            await fetchState(
+              code
+            );
 
-        if (state) {
-          onChange(state);
-        }
+          if (state) {
 
-      },
-      2000
-    );
+            onChange(state);
+
+          }
+
+        },
+        2000
+      );
 
   }
 
@@ -1246,7 +1390,9 @@ window.addEventListener('error', function (e) {
     async function () {
 
       const val =
-        Number(hostSecretInput.value);
+        Number(
+          hostSecretInput.value
+        );
 
       if (
         !Number.isInteger(val) ||
@@ -1261,10 +1407,14 @@ window.addEventListener('error', function (e) {
 
       }
 
-      hostError.textContent = '';
+      hostError.textContent =
+        '';
 
-      createGameBtn.disabled = true;
-      createGameBtn.textContent = 'Creating...';
+      createGameBtn.disabled =
+        true;
+
+      createGameBtn.textContent =
+        'Creating...';
 
       const code =
         await generateUniqueCode();
@@ -1273,24 +1423,35 @@ window.addEventListener('error', function (e) {
 
         mode: 'duel',
 
-        status: 'waiting_for_join',
+        status:
+          'waiting_for_join',
 
         turn: 'a',
 
         winner: null,
 
         a: {
+
           secret: val,
+
           low: LOW,
+
           high: HIGH,
+
           guesses: []
+
         },
 
         b: {
+
           secret: null,
+
           low: LOW,
+
           high: HIGH,
+
           guesses: []
+
         }
 
       };
@@ -1303,7 +1464,9 @@ window.addEventListener('error', function (e) {
         );
 
 
-      createGameBtn.disabled = false;
+      createGameBtn.disabled =
+        false;
+
       createGameBtn.textContent =
         'Create duel';
 
@@ -1318,8 +1481,12 @@ window.addEventListener('error', function (e) {
       }
 
 
-      currentCode = code;
-      myRole = 'a';
+      currentCode =
+        code;
+
+      myRole =
+        'a';
+
 
       hostCodeDisplay.textContent =
         code;
@@ -1327,7 +1494,8 @@ window.addEventListener('error', function (e) {
       hostWaitStatus.textContent =
         'Waiting for your opponent to join...';
 
-      hostSecretInput.value = '';
+      hostSecretInput.value =
+        '';
 
       show('hostWatch');
 
@@ -1337,11 +1505,15 @@ window.addEventListener('error', function (e) {
         function (newState) {
 
           if (
-            newState.status === 'playing' ||
-            newState.status === 'won'
+            newState.status ===
+              'playing' ||
+            newState.status ===
+              'won'
           ) {
 
-            enterDuel(newState);
+            enterDuel(
+              newState
+            );
 
           }
 
@@ -1386,7 +1558,8 @@ window.addEventListener('error', function (e) {
       'startDuelBtn'
     );
 
-  let pendingCode = null;
+  let pendingCode =
+    null;
 
 
   checkCodeBtn.addEventListener(
@@ -1396,7 +1569,9 @@ window.addEventListener('error', function (e) {
       const code =
         codeInput.value.trim();
 
-      if (!/^\d{4}$/.test(code)) {
+      if (
+        !/^\d{4}$/.test(code)
+      ) {
 
         joinError.textContent =
           'Enter the 4-digit code exactly as shared';
@@ -1406,16 +1581,22 @@ window.addEventListener('error', function (e) {
       }
 
 
-      checkCodeBtn.disabled = true;
+      checkCodeBtn.disabled =
+        true;
+
       checkCodeBtn.textContent =
         'Checking...';
 
 
       const state =
-        await fetchState(code);
+        await fetchState(
+          code
+        );
 
 
-      checkCodeBtn.disabled = false;
+      checkCodeBtn.disabled =
+        false;
+
       checkCodeBtn.textContent =
         'Continue';
 
@@ -1456,11 +1637,15 @@ window.addEventListener('error', function (e) {
       }
 
 
-      joinError.textContent = '';
+      joinError.textContent =
+        '';
 
-      pendingCode = code;
+      pendingCode =
+        code;
 
-      show('joinSecret');
+      show(
+        'joinSecret'
+      );
 
     }
   );
@@ -1471,7 +1656,9 @@ window.addEventListener('error', function (e) {
     async function () {
 
       const val =
-        Number(joinSecretInput.value);
+        Number(
+          joinSecretInput.value
+        );
 
 
       if (
@@ -1488,9 +1675,12 @@ window.addEventListener('error', function (e) {
       }
 
 
-      joinSecretError.textContent = '';
+      joinSecretError.textContent =
+        '';
 
-      startDuelBtn.disabled = true;
+      startDuelBtn.disabled =
+        true;
+
       startDuelBtn.textContent =
         'Starting...';
 
@@ -1504,13 +1694,15 @@ window.addEventListener('error', function (e) {
       if (
         !state ||
         state.status !==
-        'waiting_for_join'
+          'waiting_for_join'
       ) {
 
         joinSecretError.textContent =
           'This duel is no longer available.';
 
-        startDuelBtn.disabled = false;
+        startDuelBtn.disabled =
+          false;
+
         startDuelBtn.textContent =
           'Start duel';
 
@@ -1519,8 +1711,11 @@ window.addEventListener('error', function (e) {
       }
 
 
-      state.b.secret = val;
-      state.status = 'playing';
+      state.b.secret =
+        val;
+
+      state.status =
+        'playing';
 
 
       const updated =
@@ -1535,7 +1730,9 @@ window.addEventListener('error', function (e) {
         joinSecretError.textContent =
           'Could not start the duel. Please try again.';
 
-        startDuelBtn.disabled = false;
+        startDuelBtn.disabled =
+          false;
+
         startDuelBtn.textContent =
           'Start duel';
 
@@ -1544,17 +1741,25 @@ window.addEventListener('error', function (e) {
       }
 
 
-      currentCode = pendingCode;
-      myRole = 'b';
+      currentCode =
+        pendingCode;
 
-      joinSecretInput.value = '';
+      myRole =
+        'b';
 
-      startDuelBtn.disabled = false;
+      joinSecretInput.value =
+        '';
+
+      startDuelBtn.disabled =
+        false;
+
       startDuelBtn.textContent =
         'Start duel';
 
 
-      enterDuel(state);
+      enterDuel(
+        state
+      );
 
     }
   );
@@ -1633,13 +1838,17 @@ window.addEventListener('error', function (e) {
      RENDER DUEL
   ========================= */
 
-  function renderDuel(state) {
+  function renderDuel(
+    state
+  ) {
 
     const mine =
       state[myRole];
 
     const opp =
-      state[oppRole(myRole)];
+      state[
+        oppRole(myRole)
+      ];
 
 
     lowBound.textContent =
@@ -1649,14 +1858,17 @@ window.addEventListener('error', function (e) {
       mine.high;
 
 
-    guessHistory.innerHTML = '';
+    guessHistory.innerHTML =
+      '';
 
 
     mine.guesses.forEach(
       function (g) {
 
         const chip =
-          document.createElement('span');
+          document.createElement(
+            'span'
+          );
 
         chip.textContent =
           g.value;
@@ -1669,11 +1881,12 @@ window.addEventListener('error', function (e) {
     );
 
 
-    /* =========================
-       GAME OVER
-    ========================= */
+    /* GAME OVER */
 
-    if (state.status === 'won') {
+    if (
+      state.status ===
+      'won'
+    ) {
 
       stopPolling();
 
@@ -1690,7 +1903,10 @@ window.addEventListener('error', function (e) {
         'turn-badge';
 
 
-      if (state.winner === myRole) {
+      if (
+        state.winner ===
+        myRole
+      ) {
 
         numberDisplay.textContent =
           opp.secret;
@@ -1718,12 +1934,11 @@ window.addEventListener('error', function (e) {
         `Your secret was ${mine.secret}. Their secret was ${opp.secret}.`;
 
       return;
+
     }
 
 
-    /* =========================
-       GAME STILL PLAYING
-    ========================= */
+    /* GAME STILL PLAYING */
 
     newDuelBtn.style.display =
       'none';
@@ -1736,7 +1951,10 @@ window.addEventListener('error', function (e) {
       } so far.`;
 
 
-    if (state.turn === myRole) {
+    if (
+      state.turn ===
+      myRole
+    ) {
 
       guessRow.style.display =
         'flex';
@@ -1765,8 +1983,11 @@ window.addEventListener('error', function (e) {
           : 'Make your first guess';
 
 
-      guessInput.disabled = false;
-      goBtn.disabled = false;
+      guessInput.disabled =
+        false;
+
+      goBtn.disabled =
+        false;
 
     } else {
 
@@ -1795,24 +2016,35 @@ window.addEventListener('error', function (e) {
         'Waiting for your opponent to guess...';
 
 
-      guessInput.disabled = true;
-      goBtn.disabled = true;
+      guessInput.disabled =
+        true;
+
+      goBtn.disabled =
+        true;
 
     }
 
   }
 
 
-  function enterDuel(state) {
+  function enterDuel(
+    state
+  ) {
 
     show('duel');
 
-    renderDuel(state);
+    renderDuel(
+      state
+    );
 
     pollGame(
       currentCode,
       function (newState) {
-        renderDuel(newState);
+
+        renderDuel(
+          newState
+        );
+
       }
     );
 
@@ -1831,7 +2063,9 @@ window.addEventListener('error', function (e) {
         !currentCode ||
         !myRole
       ) {
+
         return;
+
       }
 
 
@@ -1856,12 +2090,18 @@ window.addEventListener('error', function (e) {
 
       if (
         !state ||
-        state.status !== 'playing' ||
-        state.turn !== myRole
+        state.status !==
+          'playing' ||
+        state.turn !==
+          myRole
       ) {
 
         if (state) {
-          renderDuel(state);
+
+          renderDuel(
+            state
+          );
+
         }
 
         return;
@@ -1873,7 +2113,9 @@ window.addEventListener('error', function (e) {
         state[myRole];
 
       const opp =
-        state[oppRole(myRole)];
+        state[
+          oppRole(myRole)
+        ];
 
 
       if (
@@ -1893,17 +2135,27 @@ window.addEventListener('error', function (e) {
       let result;
 
 
-      if (g === opp.secret) {
+      if (
+        g ===
+        opp.secret
+      ) {
 
-        result = 'win';
+        result =
+          'win';
 
-        state.status = 'won';
+        state.status =
+          'won';
 
-        state.winner = myRole;
+        state.winner =
+          myRole;
 
-      } else if (g < opp.secret) {
+      } else if (
+        g <
+        opp.secret
+      ) {
 
-        result = 'higher';
+        result =
+          'higher';
 
         mine.low =
           Math.max(
@@ -1913,7 +2165,8 @@ window.addEventListener('error', function (e) {
 
       } else {
 
-        result = 'lower';
+        result =
+          'lower';
 
         mine.high =
           Math.min(
@@ -1925,12 +2178,18 @@ window.addEventListener('error', function (e) {
 
 
       mine.guesses.push({
+
         value: g,
+
         result: result
+
       });
 
 
-      if (state.status !== 'won') {
+      if (
+        state.status !==
+        'won'
+      ) {
 
         state.turn =
           oppRole(myRole);
@@ -1938,7 +2197,8 @@ window.addEventListener('error', function (e) {
       }
 
 
-      guessInput.value = '';
+      guessInput.value =
+        '';
 
 
       await updateGame(
@@ -1947,7 +2207,9 @@ window.addEventListener('error', function (e) {
       );
 
 
-      renderDuel(state);
+      renderDuel(
+        state
+      );
 
     }
   );
@@ -1957,8 +2219,13 @@ window.addEventListener('error', function (e) {
     'keydown',
     function (e) {
 
-      if (e.key === 'Enter') {
+      if (
+        e.key ===
+        'Enter'
+      ) {
+
         goBtn.click();
+
       }
 
     }
@@ -1971,10 +2238,14 @@ window.addEventListener('error', function (e) {
 
       stopPolling();
 
-      currentCode = null;
-      myRole = null;
+      currentCode =
+        null;
 
-      codeInput.value = '';
+      myRole =
+        null;
+
+      codeInput.value =
+        '';
 
       show('mode');
 
@@ -2056,11 +2327,6 @@ window.addEventListener('error', function (e) {
       'cbMyHistory'
     );
 
-  const cbOppHistory =
-    document.getElementById(
-      'cbOppHistory'
-    );
-
   const cbNewGameBtn =
     document.getElementById(
       'cbNewGameBtn'
@@ -2074,21 +2340,32 @@ window.addEventListener('error', function (e) {
   function generateSecretCode() {
 
     const digits = [
-      '0','1','2','3','4',
-      '5','6','7','8','9'
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9'
     ];
 
 
     for (
-      let i = digits.length - 1;
+      let i =
+        digits.length - 1;
       i > 0;
       i--
     ) {
 
       const j =
         Math.floor(
-          Math.random() * (i + 1)
+          Math.random() *
+          (i + 1)
         );
+
 
       [
         digits[i],
@@ -2117,7 +2394,9 @@ window.addEventListener('error', function (e) {
     secret
   ) {
 
-    let bulls = 0;
+    let bulls =
+      0;
+
 
     for (
       let i = 0;
@@ -2126,7 +2405,8 @@ window.addEventListener('error', function (e) {
     ) {
 
       if (
-        guess[i] === secret[i]
+        guess[i] ===
+        secret[i]
       ) {
 
         bulls++;
@@ -2136,7 +2416,9 @@ window.addEventListener('error', function (e) {
     }
 
 
-    let cows = 0;
+    let cows =
+      0;
+
 
     for (
       let i = 0;
@@ -2145,8 +2427,11 @@ window.addEventListener('error', function (e) {
     ) {
 
       if (
-        guess[i] !== secret[i] &&
-        secret.includes(guess[i])
+        guess[i] !==
+          secret[i] &&
+        secret.includes(
+          guess[i]
+        )
       ) {
 
         cows++;
@@ -2157,8 +2442,13 @@ window.addEventListener('error', function (e) {
 
 
     return {
-      bulls: bulls,
-      cows: cows
+
+      bulls:
+        bulls,
+
+      cows:
+        cows
+
     };
 
   }
@@ -2172,7 +2462,8 @@ window.addEventListener('error', function (e) {
     'click',
     async function () {
 
-      cbToHostBtn.disabled = true;
+      cbToHostBtn.disabled =
+        true;
 
       const code =
         await generateUniqueCode();
@@ -2180,23 +2471,31 @@ window.addEventListener('error', function (e) {
 
       const state = {
 
-        mode: 'codebreaker',
+        mode:
+          'codebreaker',
 
-        status: 'waiting_for_join',
+        status:
+          'waiting_for_join',
 
-        turn: 'a',
+        turn:
+          'a',
 
-        winner: null,
+        winner:
+          null,
 
         secret:
           generateSecretCode(),
 
         a: {
+
           guesses: []
+
         },
 
         b: {
+
           guesses: []
+
         }
 
       };
@@ -2209,7 +2508,8 @@ window.addEventListener('error', function (e) {
         );
 
 
-      cbToHostBtn.disabled = false;
+      cbToHostBtn.disabled =
+        false;
 
 
       if (!ok) {
@@ -2223,8 +2523,11 @@ window.addEventListener('error', function (e) {
       }
 
 
-      currentCode = code;
-      myRole = 'a';
+      currentCode =
+        code;
+
+      myRole =
+        'a';
 
 
       cbHostCodeDisplay.textContent =
@@ -2234,7 +2537,9 @@ window.addEventListener('error', function (e) {
         'Waiting for your opponent to join...';
 
 
-      show('cbHostWatch');
+      show(
+        'cbHostWatch'
+      );
 
 
       pollGame(
@@ -2242,8 +2547,10 @@ window.addEventListener('error', function (e) {
         function (newState) {
 
           if (
-            newState.status === 'playing' ||
-            newState.status === 'won'
+            newState.status ===
+              'playing' ||
+            newState.status ===
+              'won'
           ) {
 
             enterCodebreaker(
@@ -2263,7 +2570,9 @@ window.addEventListener('error', function (e) {
     'click',
     function () {
 
-      show('cbJoin');
+      show(
+        'cbJoin'
+      );
 
     }
   );
@@ -2281,7 +2590,9 @@ window.addEventListener('error', function (e) {
         cbCodeInput.value.trim();
 
 
-      if (!/^\d{4}$/.test(code)) {
+      if (
+        !/^\d{4}$/.test(code)
+      ) {
 
         cbJoinError.textContent =
           'Enter the 4-digit code exactly as shared';
@@ -2291,16 +2602,22 @@ window.addEventListener('error', function (e) {
       }
 
 
-      cbJoinBtn.disabled = true;
+      cbJoinBtn.disabled =
+        true;
+
       cbJoinBtn.textContent =
         'Joining...';
 
 
       const state =
-        await fetchState(code);
+        await fetchState(
+          code
+        );
 
 
-      cbJoinBtn.disabled = false;
+      cbJoinBtn.disabled =
+        false;
+
       cbJoinBtn.textContent =
         'Join room';
 
@@ -2341,10 +2658,12 @@ window.addEventListener('error', function (e) {
       }
 
 
-      cbJoinError.textContent = '';
+      cbJoinError.textContent =
+        '';
 
 
-      state.status = 'playing';
+      state.status =
+        'playing';
 
 
       const updated =
@@ -2364,20 +2683,27 @@ window.addEventListener('error', function (e) {
       }
 
 
-      currentCode = code;
-      myRole = 'b';
+      currentCode =
+        code;
 
-      cbCodeInput.value = '';
+      myRole =
+        'b';
+
+      cbCodeInput.value =
+        '';
 
 
-      enterCodebreaker(state);
+      enterCodebreaker(
+        state
+      );
 
     }
   );
 
 
   /* =========================
-     RENDER GUESS LIST
+     RENDER YOUR GUESS LIST
+     ONLY
   ========================= */
 
   function renderGuessList(
@@ -2385,10 +2711,13 @@ window.addEventListener('error', function (e) {
     guesses
   ) {
 
-    container.innerHTML = '';
+    container.innerHTML =
+      '';
 
 
-    if (!guesses.length) {
+    if (
+      !guesses.length
+    ) {
 
       const empty =
         document.createElement(
@@ -2476,8 +2805,12 @@ window.addEventListener('error', function (e) {
     const mine =
       state[myRole];
 
-    const opp =
-      state[oppRole(myRole)];
+
+    /*
+      IMPORTANT:
+      Opponent guesses are NOT
+      rendered or displayed.
+    */
 
 
     renderGuessList(
@@ -2486,17 +2819,14 @@ window.addEventListener('error', function (e) {
     );
 
 
-    renderGuessList(
-      cbOppHistory,
-      opp.guesses
-    );
-
-
     /* =========================
        GAME OVER
     ========================= */
 
-    if (state.status === 'won') {
+    if (
+      state.status ===
+      'won'
+    ) {
 
       stopPolling();
 
@@ -2518,7 +2848,8 @@ window.addEventListener('error', function (e) {
 
 
       if (
-        state.winner === myRole
+        state.winner ===
+        myRole
       ) {
 
         cbNumberDisplay.className =
@@ -2571,7 +2902,8 @@ window.addEventListener('error', function (e) {
 
 
     if (
-      state.turn === myRole
+      state.turn ===
+      myRole
     ) {
 
       cbTurnBadge.textContent =
@@ -2587,8 +2919,11 @@ window.addEventListener('error', function (e) {
           : 'Make your first guess';
 
 
-      cbGuessInput.disabled = false;
-      cbGoBtn.disabled = false;
+      cbGuessInput.disabled =
+        false;
+
+      cbGoBtn.disabled =
+        false;
 
     } else {
 
@@ -2603,8 +2938,11 @@ window.addEventListener('error', function (e) {
         'Waiting for your opponent to guess...';
 
 
-      cbGuessInput.disabled = true;
-      cbGoBtn.disabled = true;
+      cbGuessInput.disabled =
+        true;
+
+      cbGoBtn.disabled =
+        true;
 
     }
 
@@ -2615,16 +2953,22 @@ window.addEventListener('error', function (e) {
     state
   ) {
 
-    show('cbPlay');
+    show(
+      'cbPlay'
+    );
 
-    renderCodebreaker(state);
+    renderCodebreaker(
+      state
+    );
 
     pollGame(
       currentCode,
       function (newState) {
+
         renderCodebreaker(
           newState
         );
+
       }
     );
 
@@ -2653,7 +2997,9 @@ window.addEventListener('error', function (e) {
         cbGuessInput.value.trim();
 
 
-      if (!/^\d{4}$/.test(raw)) {
+      if (
+        !/^\d{4}$/.test(raw)
+      ) {
 
         cbFeedback.textContent =
           'Enter exactly 4 digits';
@@ -2685,14 +3031,18 @@ window.addEventListener('error', function (e) {
 
       if (
         !state ||
-        state.status !== 'playing' ||
-        state.turn !== myRole
+        state.status !==
+          'playing' ||
+        state.turn !==
+          myRole
       ) {
 
         if (state) {
+
           renderCodebreaker(
             state
           );
+
         }
 
         return;
@@ -2707,24 +3057,32 @@ window.addEventListener('error', function (e) {
         );
 
 
-      state[myRole].guesses.push({
+      state[myRole]
+        .guesses
+        .push({
 
-        value: raw,
+          value:
+            raw,
 
-        bulls: result.bulls,
+          bulls:
+            result.bulls,
 
-        cows: result.cows
+          cows:
+            result.cows
 
-      });
+        });
 
 
       if (
-        result.bulls === 4
+        result.bulls ===
+        4
       ) {
 
-        state.status = 'won';
+        state.status =
+          'won';
 
-        state.winner = myRole;
+        state.winner =
+          myRole;
 
       } else {
 
@@ -2734,7 +3092,8 @@ window.addEventListener('error', function (e) {
       }
 
 
-      cbGuessInput.value = '';
+      cbGuessInput.value =
+        '';
 
 
       await updateGame(
@@ -2755,8 +3114,13 @@ window.addEventListener('error', function (e) {
     'keydown',
     function (e) {
 
-      if (e.key === 'Enter') {
+      if (
+        e.key ===
+        'Enter'
+      ) {
+
         cbGoBtn.click();
+
       }
 
     }
@@ -2773,12 +3137,18 @@ window.addEventListener('error', function (e) {
 
       stopPolling();
 
-      currentCode = null;
-      myRole = null;
+      currentCode =
+        null;
 
-      cbCodeInput.value = '';
+      myRole =
+        null;
 
-      show('mode');
+      cbCodeInput.value =
+        '';
+
+      show(
+        'mode'
+      );
 
     }
   );
@@ -2788,3 +3158,7 @@ window.addEventListener('error', function (e) {
 
 </body>
 </html>
+
+The important change is in Crack mode: the "Opponent's guesses" section has been removed, and "renderCodebreaker()" only renders "mine.guesses". The opponent's guesses are still stored in the game state for game functionality, but they are not displayed on the player's screen.
+
+One important security note: because your current architecture sends the entire "state" (including the secret and both players' guesses) to the browser, hiding the opponent's guesses in HTML/JavaScript is UI hiding, not true privacy. A technically savvy player could inspect the Supabase response and potentially see hidden data. For true protection, the Supabase database/RLS or server-side game logic needs to prevent each player from receiving the opponent's private data.
