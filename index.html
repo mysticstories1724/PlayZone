@@ -295,6 +295,23 @@
 </div>
 ​
 <script>
+window.addEventListener('error', function(e){
+  try {
+    const app = document.getElementById('app');
+    if (!app) return;
+    const div = document.createElement('div');
+    div.className = 'setup-missing';
+    div.style.marginBottom = '20px';
+    div.style.borderColor = '#b0493f';
+    div.innerHTML = '<strong>Something broke on this page:</strong><br><br>' +
+      (e.message || 'Unknown error') +
+      '<br><br>(line ' + e.lineno + ')' +
+      '<br><br>Send this message back so it can be fixed.';
+    app.insertBefore(div, app.firstChild);
+  } catch (err){}
+});
+</script>
+<script>
 (function(){
   // ---- Fill these in with your own Supabase project values ----
   const SUPABASE_URL = 'https://uenyqkyuyxbbqehjzspk.supabase.co';
