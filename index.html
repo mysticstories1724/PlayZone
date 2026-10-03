@@ -1,860 +1,732 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Number Duel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Number Duel</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-
-  :root {
-    --ink: #1b1a2e;
-    --paper: #f6f3ec;
-    --dial: #2e2b4a;
-    --warm: #e2763a;
-    --cool: #3b7a8a;
-    --win: #2f8f5b;
-    --lose: #b0493f;
-    --line: rgba(27,26,46,0.14);
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'IBM Plex Mono', monospace;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 32px 16px;
-  }
-
-  .stage {
-    width: 100%;
-    max-width: 440px;
-  }
-
-  h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 700;
-    font-size: clamp(1.8rem, 6vw, 2.4rem);
-    line-height: 1.05;
-    margin: 0 0 6px;
-    letter-spacing: -0.01em;
-  }
-
-  .sub {
-    font-size: 0.88rem;
-    color: #5c5a72;
-    margin: 0 0 24px;
-    max-width: 36ch;
-  }
-
-  .screen {
-    display: none;
-  }
-
-  .screen.active {
-    display: block;
-  }
-
-  .card {
-    background: var(--dial);
-    border-radius: 18px;
-    padding: 28px 22px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      circle at 50% -10%,
-      rgba(255,255,255,0.08),
-      transparent 60%
-    );
-    pointer-events: none;
-  }
-
-  .choice-row {
-    display: flex;
-    gap: 12px;
-    margin-top: 4px;
-  }
-
-  .choice-btn {
-    flex: 1;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.95rem;
-    font-weight: 500;
-    padding: 20px 12px;
-    border: 2px solid var(--ink);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--ink);
-    cursor: pointer;
-    text-align: center;
-  }
-
-  .choice-btn .big {
-    display: block;
-    font-family: 'Fraunces', serif;
-    font-size: 1.5rem;
-    margin-bottom: 4px;
-  }
-
-  .choice-btn:hover {
-    background: var(--ink);
-    color: var(--paper);
-  }
-
-  label {
-    display: block;
-    font-size: 0.78rem;
-    color: #8a8798;
-    margin-bottom: 6px;
-  }
-
-  input[type="number"],
-  input[type="text"] {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 1rem;
-    padding: 14px;
-    border: 2px solid var(--line);
-    border-radius: 10px;
-    background: #fff;
-    color: var(--ink);
-    width: 100%;
-  }
-
-  input:focus {
-    outline: none;
-    border-color: var(--ink);
-  }
-
-  .field {
-    margin-bottom: 14px;
-  }
-
-  button.primary {
-    width: 100%;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.95rem;
-    font-weight: 500;
-    padding: 15px 10px;
-    border: 2px solid var(--ink);
-    border-radius: 10px;
-    background: var(--ink);
-    color: var(--paper);
-    cursor: pointer;
-    margin-top: 4px;
-  }
-
-  button.primary:hover {
-    background: #000;
-  }
-
-  button.primary:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  button.ghost {
-    width: 100%;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.85rem;
-    padding: 10px;
-    border: none;
-    background: none;
-    color: #8a8798;
-    text-decoration: underline;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-
-  .code-display {
-    text-align: center;
-    margin: 18px 0;
-    position: relative;
-    z-index: 1;
-  }
-
-  .code-display .label {
-    font-size: 0.75rem;
-    color: #9d9ab0;
-    margin-bottom: 6px;
-  }
-
-  .code-display .code {
-    font-family: 'Fraunces', serif;
-    font-weight: 700;
-    font-size: 3rem;
-    letter-spacing: 0.08em;
-    color: var(--paper);
-  }
-
-  .status-line {
-    text-align: center;
-    color: #c9c6d8;
-    font-size: 0.92rem;
-    position: relative;
-    z-index: 1;
-    min-height: 1.4em;
-    margin-bottom: 4px;
-  }
-
-  .turn-badge {
-    display: inline-block;
-    text-align: center;
-    font-size: 0.78rem;
-    padding: 5px 14px;
-    border-radius: 999px;
-    background: rgba(246,243,236,0.1);
-    color: var(--paper);
-    position: relative;
-    z-index: 1;
-    margin: 0 auto 14px;
-  }
-
-  .turn-badge.mine {
-    background: var(--warm);
-    color: #fff;
-  }
-
-  .turn-row {
-    text-align: center;
-  }
-
-  .reading {
-    text-align: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .number {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: clamp(3.2rem, 18vw, 4.4rem);
-    color: var(--paper);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    transition: color 0.25s ease;
-  }
-
-  .number.warm {
-    color: var(--warm);
-  }
-
-  .number.cool {
-    color: var(--cool);
-  }
-
-  .number.win {
-    color: var(--win);
-  }
-
-  .number.lose {
-    color: var(--lose);
-  }
-
-  .feedback {
-    min-height: 1.4em;
-    margin-top: 10px;
-    font-size: 0.95rem;
-    color: #c9c6d8;
-  }
-
-  .range-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.78rem;
-    color: #8a8798;
-    margin-bottom: 8px;
-    padding: 0 2px;
-  }
-
-  .tries {
-    position: relative;
-    z-index: 1;
-    margin-top: 16px;
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .tries span {
-    font-size: 0.72rem;
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: rgba(246,243,236,0.08);
-    color: #9d9ab0;
-  }
-
-  .guess-row {
-    margin-top: 14px;
-    display: flex;
-    gap: 10px;
-  }
-
-  .guess-row input {
-    flex: 1;
-  }
-
-  .go {
-    width: 88px;
-    flex: none;
-    border-radius: 10px;
-    border: 2px solid var(--ink);
-    background: var(--ink);
-    color: var(--paper);
-    font-family: 'IBM Plex Mono', monospace;
-    cursor: pointer;
-  }
-
-  .go:hover {
-    background: #000;
-  }
-
-  .go:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  .copy-note {
-    font-size: 0.78rem;
-    color: #8a8798;
-    margin-top: 16px;
-    text-align: center;
-    line-height: 1.5;
-  }
-
-  .back-link {
-    font-size: 0.78rem;
-    color: #8a8798;
-    text-decoration: underline;
-    cursor: pointer;
-    display: inline-block;
-    margin-bottom: 14px;
-  }
-
-  .error-text {
-    color: var(--warm);
-    font-size: 0.82rem;
-    margin-top: -4px;
-    margin-bottom: 12px;
-    min-height: 1.2em;
-  }
-
-  .setup-missing {
-    max-width: 440px;
-    padding: 24px;
-    border: 2px solid var(--ink);
-    border-radius: 14px;
-    font-size: 0.88rem;
-    line-height: 1.6;
-  }
-
-  .setup-missing code {
-    background: rgba(0,0,0,0.06);
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
-  .section-label {
-    font-size: 0.78rem;
-    color: #8a8798;
-    margin: 18px 0 8px;
-    text-align: left;
-  }
-
-  .cb-guess-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 12px;
-    border-radius: 8px;
-    background: rgba(27,26,46,0.05);
-    margin-bottom: 6px;
-    font-size: 0.85rem;
-  }
-
-  .cb-guess-row .code {
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-  }
-
-  .cb-guess-row .fb {
-    color: #5c5a72;
-    font-size: 0.76rem;
-  }
-
-  .cb-empty {
-    font-size: 0.8rem;
-    color: #a7a4b8;
-    padding: 6px 2px;
-  }
-
-  @media (max-width: 480px) {
-    .choice-row {
-      flex-direction: column;
+  <style>
+    * {
+      box-sizing: border-box;
     }
 
-    .choice-btn {
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      background: #f6f5fb;
+      color: #1b1a2e;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
       width: 100%;
+      max-width: 620px;
+      margin: auto;
+      padding: 24px 16px 40px;
     }
-  }
-</style>
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 800;
+    }
+
+    .header p {
+      margin: 6px 0 0;
+      color: #77748c;
+      font-size: 0.9rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 30px rgba(30, 25, 70, 0.07);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #77748c;
+      margin-bottom: 10px;
+    }
+
+    .mode-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .mode-btn {
+      border: 1px solid #ddd9eb;
+      background: #fff;
+      color: #55516c;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .mode-btn.active {
+      background: #1b1a2e;
+      color: white;
+      border-color: #1b1a2e;
+    }
+
+    .input {
+      width: 100%;
+      border: 1px solid #dcd8e8;
+      border-radius: 10px;
+      padding: 13px;
+      outline: none;
+      background: white;
+      color: #1b1a2e;
+    }
+
+    .input:focus {
+      border-color: #7568d9;
+      box-shadow: 0 0 0 3px rgba(117, 104, 217, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-weight: 800;
+      margin-top: 10px;
+    }
+
+    .btn-primary {
+      background: #1b1a2e;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #eeeaf8;
+      color: #332e50;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .room-code {
+      text-align: center;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      padding: 12px;
+      background: #f2effa;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+
+    .round-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .round-box {
+      text-align: center;
+      padding: 10px 5px;
+      border-radius: 10px;
+      background: #f5f3fa;
+    }
+
+    .round-box small {
+      display: block;
+      color: #77748c;
+      font-size: 0.65rem;
+      margin-bottom: 3px;
+    }
+
+    .round-box strong {
+      font-size: 0.95rem;
+    }
+
+    .score-board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .score-card {
+      background: #f5f3fa;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .score-card small {
+      display: block;
+      color: #77748c;
+      font-size: 0.68rem;
+      margin-bottom: 4px;
+    }
+
+    .score-card strong {
+      display: block;
+      font-size: 1.35rem;
+    }
+
+    .status {
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      background: #f5f3fa;
+      color: #5c5870;
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+    }
+
+    .turn {
+      text-align: center;
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 15px;
+    }
+
+    .guess-input {
+      text-align: center;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 1.4rem;
+      letter-spacing: 0.2em;
+    }
+
+    .history-title {
+      margin-top: 20px;
+    }
+
+    .empty-state {
+      color: #8a879a;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 0.85rem;
+    }
+
+    .cb-guess-row {
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      background: rgba(27, 26, 46, 0.05);
+    }
+
+    .cb-code {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      margin-bottom: 5px;
+    }
+
+    .cb-summary {
+      font-size: 0.76rem;
+      color: #6b6880;
+      margin-bottom: 8px;
+    }
+
+    .cb-digit-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .cb-digit-result {
+      font-size: 0.75rem;
+      padding: 6px 8px;
+      border-radius: 6px;
+    }
+
+    .cb-digit-result.correct-position {
+      background: rgba(34, 197, 94, 0.12);
+      color: #15803d;
+    }
+
+    .cb-digit-result.wrong-position {
+      background: rgba(234, 179, 8, 0.12);
+      color: #a16207;
+    }
+
+    .cb-digit-result.not-found {
+      background: rgba(239, 68, 68, 0.08);
+      color: #b91c1c;
+    }
+
+    .round-result {
+      text-align: center;
+      background: #f2effa;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 15px;
+    }
+
+    .round-result h3 {
+      margin: 0 0 7px;
+    }
+
+    .round-result p {
+      margin: 4px 0;
+      color: #66627a;
+      font-size: 0.85rem;
+    }
+
+    .winner {
+      text-align: center;
+      padding: 18px;
+      border-radius: 12px;
+      background: #eeeaf8;
+      font-weight: 800;
+      margin-bottom: 15px;
+    }
+
+    .winner-score {
+      font-size: 1.5rem;
+      margin-top: 7px;
+    }
+
+    .error {
+      color: #c62828;
+      font-size: 0.8rem;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .success {
+      color: #15803d;
+      font-size: 0.8rem;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .players {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .player-box {
+      background: #f5f3fa;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .player-box small {
+      display: block;
+      color: #77748c;
+      font-size: 0.7rem;
+      margin-bottom: 4px;
+    }
+
+    .player-box strong {
+      font-size: 0.9rem;
+    }
+
+    .back-btn {
+      background: transparent;
+      border: 0;
+      color: #6d64bb;
+      font-weight: 700;
+      padding: 5px 0;
+      margin-bottom: 12px;
+    }
+
+    .points-earned {
+      font-weight: 800;
+      color: #5b4bc4;
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        padding: 18px 12px 30px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .header h1 {
+        font-size: 1.7rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="stage" id="app">
+<div class="app">
 
-  <!-- MODE SELECT -->
-  <div class="screen active" id="screen-mode">
-    <h1>Pick a game</h1>
-
-    <p class="sub">
-      Two players, two ways to play. Choose which one.
-    </p>
-
-    <div class="choice-row">
-
-      <button class="choice-btn" id="toDuelMode">
-        <span class="big">Duel</span>
-        Guess each other's number
-      </button>
-
-      <button class="choice-btn" id="toCodebreakerMode">
-        <span class="big">Crack</span>
-        Guess the system's code
-      </button>
-
-    </div>
+  <div class="header">
+    <h1>Number Duel</h1>
+    <p>Challenge your opponent with numbers</p>
   </div>
 
 
-  <!-- DUEL LANDING -->
-  <div class="screen" id="screen-duel-landing">
-
-    <span class="back-link" data-back="mode">
-      &larr; back
-    </span>
-
-    <h1>Number duel</h1>
-
-    <p class="sub">
-      Each player picks a secret number from 1 to 100,
-      then you take turns guessing each other's.
-      First to crack it wins.
-    </p>
-
-    <div class="choice-row">
-
-      <button class="choice-btn" id="toHost">
-        <span class="big">Start</span>
-        Create a duel
-      </button>
-
-      <button class="choice-btn" id="toJoin">
-        <span class="big">Join</span>
-        Enter a code
-      </button>
-
-    </div>
-  </div>
-
-
-  <!-- HOST SETUP -->
-  <div class="screen" id="screen-host-setup">
-
-    <span class="back-link" data-back="duelLanding">
-      &larr; back
-    </span>
-
-    <h1>Pick your secret</h1>
-
-    <p class="sub">
-      Choose a whole number from 1 to 100.
-      Your opponent will only get higher / lower hints.
-    </p>
-
-    <div class="field">
-
-      <label for="hostSecretInput">
-        Your secret number (1-100)
-      </label>
-
-      <input
-        type="number"
-        id="hostSecretInput"
-        min="1"
-        max="100"
-        placeholder="e.g. 42"
-      >
-
-    </div>
-
-    <div class="error-text" id="hostError"></div>
-
-    <button class="primary" id="createGameBtn">
-      Create duel
-    </button>
-
-  </div>
-
-
-  <!-- HOST WAITING -->
-  <div class="screen" id="screen-host-watch">
-
-    <h1>Share this code</h1>
-
-    <p class="sub">
-      Send this code to your opponent.
-      Once they join and set their own secret,
-      the duel begins automatically.
-    </p>
+  <!-- HOME -->
+  <div id="homeScreen">
 
     <div class="card">
 
-      <div class="code-display">
+      <div class="section-label">
+        Game mode
+      </div>
 
-        <div class="label">
-          GAME CODE
-        </div>
+      <div class="mode-buttons">
 
-        <div class="code" id="hostCodeDisplay">
-          0000
-        </div>
+        <button
+          id="duelModeBtn"
+          class="mode-btn active"
+        >
+          Duel
+        </button>
+
+        <button
+          id="crackModeBtn"
+          class="mode-btn"
+        >
+          Crack
+        </button>
 
       </div>
 
-      <div class="status-line" id="hostWaitStatus">
-        Waiting for your opponent to join...
-      </div>
-
-    </div>
-  </div>
-
-
-  <!-- JOIN SETUP -->
-  <div class="screen" id="screen-join-setup">
-
-    <span class="back-link" data-back="duelLanding">
-      &larr; back
-    </span>
-
-    <h1>Enter the code</h1>
-
-    <p class="sub">
-      Ask your opponent for the 4-digit duel code they created.
-    </p>
-
-    <div class="field">
-
-      <label for="codeInput">
-        Duel code
-      </label>
-
-      <input
-        type="text"
-        id="codeInput"
-        inputmode="numeric"
-        maxlength="4"
-        placeholder="e.g. 1234"
-      >
-
     </div>
 
-    <div class="error-text" id="joinError"></div>
-
-    <button class="primary" id="checkCodeBtn">
-      Continue
-    </button>
-
-  </div>
-
-
-  <!-- JOIN SECRET -->
-  <div class="screen" id="screen-join-secret">
-
-    <h1>Pick your secret</h1>
-
-    <p class="sub">
-      Choose your own secret number from 1 to 100.
-      Your opponent will try to guess it too.
-    </p>
-
-    <div class="field">
-
-      <label for="joinSecretInput">
-        Your secret number (1-100)
-      </label>
-
-      <input
-        type="number"
-        id="joinSecretInput"
-        min="1"
-        max="100"
-        placeholder="e.g. 17"
-      >
-
-    </div>
-
-    <div class="error-text" id="joinSecretError"></div>
-
-    <button class="primary" id="startDuelBtn">
-      Start duel
-    </button>
-
-  </div>
-
-
-  <!-- DUEL PLAY -->
-  <div class="screen" id="screen-duel">
-
-    <h1>Number duel</h1>
-
-    <div class="turn-row">
-
-      <span class="turn-badge" id="turnBadge">
-        Checking turn...
-      </span>
-
-    </div>
-
-    <div class="range-row">
-
-      <span id="lowBound">1</span>
-
-      <span id="highBound">100</span>
-
-    </div>
 
     <div class="card">
 
-      <div class="reading">
-
-        <div class="number" id="numberDisplay">
-          ?
-        </div>
-
-        <div class="feedback" id="feedback">
-          Waiting...
-        </div>
-
+      <div class="section-label">
+        Create room
       </div>
 
-      <div class="tries" id="guessHistory"></div>
-
-    </div>
-
-    <div class="guess-row" id="guessRow">
-
-      <input
-        type="number"
-        id="guessInput"
-        min="1"
-        max="100"
-        placeholder="Your guess"
-        aria-label="Your guess"
+      <button
+        id="createBtn"
+        class="btn btn-primary"
       >
-
-      <button class="go" id="goBtn">
-        Guess
+        Create Room
       </button>
 
+
+      <div style="height:18px"></div>
+
+
+      <div class="section-label">
+        Join room
+      </div>
+
+      <input
+        id="joinCodeInput"
+        class="input"
+        placeholder="Enter room code"
+        maxlength="8"
+      />
+
+      <button
+        id="joinBtn"
+        class="btn btn-secondary"
+      >
+        Join Room
+      </button>
+
+      <div id="homeMessage"></div>
+
     </div>
 
-    <p class="copy-note" id="opponentNote"></p>
+  </div>
+
+
+  <!-- GAME -->
+  <div id="gameScreen" class="hidden">
 
     <button
-      class="ghost"
-      id="newDuelBtn"
-      style="display:none;"
+      id="backBtn"
+      class="back-btn"
     >
-      Start a new duel
+      ← Leave game
     </button>
 
-  </div>
-
-
-  <!-- CODEBREAKER LANDING -->
-  <div class="screen" id="screen-cb-landing">
-
-    <span class="back-link" data-back="mode">
-      &larr; back
-    </span>
-
-    <h1>Crack the code</h1>
-
-    <p class="sub">
-      The system picks a secret 4-digit code
-      (no repeated digits). Take turns guessing —
-      you'll see how many digits are right,
-      and how many are in the exact spot.
-    </p>
-
-    <div class="choice-row">
-
-      <button class="choice-btn" id="cbToHost">
-        <span class="big">Start</span>
-        Create a room
-      </button>
-
-      <button class="choice-btn" id="cbToJoin">
-        <span class="big">Join</span>
-        Enter a code
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <!-- CODEBREAKER HOST WAITING -->
-  <div class="screen" id="screen-cb-host-watch">
-
-    <h1>Share this code</h1>
-
-    <p class="sub">
-      Send this code to your opponent.
-      Once they join, you'll both start guessing
-      the system's secret code.
-    </p>
 
     <div class="card">
 
-      <div class="code-display">
+      <div class="section-label">
+        Room
+      </div>
 
-        <div class="label">
-          ROOM CODE
+      <div
+        id="roomCodeDisplay"
+        class="room-code"
+      ></div>
+
+
+      <!-- ROUND -->
+      <div class="round-bar">
+
+        <div class="round-box">
+          <small>ROUND</small>
+          <strong id="roundNumber">1 / 3</strong>
         </div>
 
-        <div class="code" id="cbHostCodeDisplay">
-          0000
+        <div class="round-box">
+          <small>YOUR SCORE</small>
+          <strong id="myScore">0</strong>
+        </div>
+
+        <div class="round-box">
+          <small>OPPONENT</small>
+          <strong id="opponentScore">0</strong>
         </div>
 
       </div>
 
-      <div class="status-line" id="cbHostWaitStatus">
-        Waiting for your opponent to join...
+
+      <div class="players">
+
+        <div class="player-box">
+          <small>You</small>
+          <strong id="myPlayerLabel">
+            Player A
+          </strong>
+        </div>
+
+        <div class="player-box">
+          <small>Opponent</small>
+          <strong id="opponentLabel">
+            Waiting...
+          </strong>
+        </div>
+
       </div>
 
-    </div>
 
-  </div>
-
-
-  <!-- CODEBREAKER JOIN -->
-  <div class="screen" id="screen-cb-join">
-
-    <span class="back-link" data-back="cbLanding">
-      &larr; back
-    </span>
-
-    <h1>Enter the room code</h1>
-
-    <p class="sub">
-      Ask your opponent for the 4-digit room code they created.
-    </p>
-
-    <div class="field">
-
-      <label for="cbCodeInput">
-        Room code
-      </label>
-
-      <input
-        type="text"
-        id="cbCodeInput"
-        inputmode="numeric"
-        maxlength="4"
-        placeholder="e.g. 1234"
+      <div
+        id="gameStatus"
+        class="status"
       >
-
-    </div>
-
-    <div class="error-text" id="cbJoinError"></div>
-
-    <button class="primary" id="cbJoinBtn">
-      Join room
-    </button>
-
-  </div>
-
-
-  <!-- CODEBREAKER PLAY -->
-  <div class="screen" id="screen-cb-play">
-
-    <h1>Crack the code</h1>
-
-    <div class="turn-row">
-
-      <span class="turn-badge" id="cbTurnBadge">
-        Checking turn...
-      </span>
-
-    </div>
-
-    <div class="card">
-
-      <div class="reading">
-
-        <div class="number" id="cbNumberDisplay">
-          ????
-        </div>
-
-        <div class="feedback" id="cbFeedback">
-          Waiting...
-        </div>
-
+        Waiting for your opponent...
       </div>
 
     </div>
 
-    <div class="guess-row" id="cbGuessRow">
 
-      <input
-        type="text"
-        id="cbGuessInput"
-        inputmode="numeric"
-        maxlength="4"
-        placeholder="4 different digits"
-      >
-
-      <button class="go" id="cbGoBtn">
-        Guess
-      </button>
-
-    </div>
-
-    <!-- ONLY YOUR GUESSES ARE SHOWN -->
-    <div class="section-label">
-      Your guesses
-    </div>
-
-    <div id="cbMyHistory"></div>
-
-    <button
-      class="ghost"
-      id="cbNewGameBtn"
-      style="display:none;"
+    <!-- DUEL -->
+    <div
+      id="duelGame"
+      class="card hidden"
     >
-      Start a new game
-    </button>
+
+      <div
+        id="duelTurn"
+        class="turn"
+      >
+        Your turn
+      </div>
+
+
+      <div id="duelSecretSection">
+
+        <div class="section-label">
+          Your secret number
+        </div>
+
+        <input
+          id="duelSecretInput"
+          class="input guess-input"
+          type="number"
+          min="1"
+          max="100"
+          placeholder="1 - 100"
+        />
+
+        <button
+          id="setSecretBtn"
+          class="btn btn-primary"
+        >
+          Set Secret
+        </button>
+
+      </div>
+
+
+      <div
+        id="duelGuessSection"
+        class="hidden"
+      >
+
+        <div class="section-label">
+          Guess opponent's number
+        </div>
+
+        <input
+          id="duelGuessInput"
+          class="input guess-input"
+          type="number"
+          min="1"
+          max="100"
+          placeholder="1 - 100"
+        />
+
+        <button
+          id="duelGuessBtn"
+          class="btn btn-primary"
+        >
+          Guess
+        </button>
+
+      </div>
+
+
+      <div
+        class="history-title section-label"
+      >
+        Your guesses
+      </div>
+
+      <div id="duelHistory"></div>
+
+    </div>
+
+
+    <!-- CRACK -->
+    <div
+      id="crackGame"
+      class="card hidden"
+    >
+
+      <div
+        id="crackTurn"
+        class="turn"
+      >
+        Your turn
+      </div>
+
+
+      <!-- SECRET SETUP -->
+      <div
+        id="crackSecretSection"
+      >
+
+        <div class="section-label">
+          Create your secret 4-digit code
+        </div>
+
+        <div style="
+          text-align:center;
+          color:#77748c;
+          font-size:.8rem;
+          margin-bottom:12px;
+        ">
+          4 different digits
+        </div>
+
+        <input
+          id="crackSecretInput"
+          class="input guess-input"
+          type="text"
+          inputmode="numeric"
+          maxlength="4"
+          placeholder="1234"
+        />
+
+        <button
+          id="setCrackSecretBtn"
+          class="btn btn-primary"
+        >
+          Set Secret Code
+        </button>
+
+      </div>
+
+
+      <!-- GUESS -->
+      <div
+        id="crackGuessSection"
+        class="hidden"
+      >
+
+        <div class="section-label">
+          Crack opponent's code
+        </div>
+
+        <div style="
+          text-align:center;
+          color:#77748c;
+          font-size:.8rem;
+          margin-bottom:12px;
+        ">
+          4 different digits
+        </div>
+
+        <input
+          id="crackGuessInput"
+          class="input guess-input"
+          type="text"
+          inputmode="numeric"
+          maxlength="4"
+          placeholder="0000"
+        />
+
+        <button
+          id="crackGuessBtn"
+          class="btn btn-primary"
+        >
+          Guess
+        </button>
+
+      </div>
+
+
+      <div
+        class="history-title section-label"
+      >
+        Your guesses
+      </div>
+
+      <div id="cbMyHistory"></div>
+
+    </div>
+
+
+    <!-- ROUND RESULT -->
+    <div
+      id="roundResult"
+      class="round-result hidden"
+    ></div>
+
+
+    <!-- FINAL WINNER -->
+    <div
+      id="winnerBox"
+      class="winner hidden"
+    ></div>
 
   </div>
 
@@ -862,452 +734,627 @@
 
 
 <script>
-window.addEventListener('error', function (e) {
 
-  try {
-
-    const app =
-      document.getElementById('app');
-
-    if (!app) {
-      return;
-    }
-
-    const div =
-      document.createElement('div');
-
-    div.className =
-      'setup-missing';
-
-    div.style.marginBottom =
-      '20px';
-
-    div.style.borderColor =
-      '#b0493f';
-
-    div.innerHTML =
-      '<strong>Something broke on this page:</strong><br><br>' +
-      (e.message || 'Unknown error') +
-      '<br><br>(line ' + e.lineno + ')' +
-      '<br><br>Send this message back so it can be fixed.';
-
-    app.insertBefore(
-      div,
-      app.firstChild
-    );
-
-  } catch (err) {
-    // Ignore secondary errors
-  }
-
-});
-</script>
-
-
-<script>
-(function () {
-
-  /* =========================
-     SUPABASE CONFIG
-  ========================= */
+  /* =========================================================
+     SUPABASE
+  ========================================================= */
 
   const SUPABASE_URL =
-    'https://uenyqkyuyxbbqehjzspk.supabase.co';
-
-  const SUPABASE_ANON_KEY =
-    'sb_publishable_FGT-Tw77u5BTy4zxbqwiHA_bmndBToE';
-
-  let supabase = null;
-  let supabaseError = null;
-
-  try {
-
-    if (
-      typeof window.supabase ===
-      'undefined'
-    ) {
-
-      throw new Error(
-        'The Supabase library did not load. Check your internet connection, then reload the page.'
-      );
-
-    }
-
-    if (
-      !SUPABASE_URL.startsWith('http') ||
-      SUPABASE_ANON_KEY ===
-      'YOUR_SUPABASE_ANON_KEY'
-    ) {
-
-      throw new Error(
-        'Supabase is not configured yet. Add your Project URL and anon key near the top of the script.'
-      );
-
-    }
-
-    supabase =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-      );
-
-  } catch (e) {
-
-    supabaseError =
-      e.message;
-
-  }
+    "https://uenyqkyuyxbbqehjzspk.supabase.co";
 
 
-  /* =========================
-     GLOBAL STATE
-  ========================= */
+  /*
+   * IMPORTANT:
+   * Put your existing Supabase anon/publishable key here.
+   */
+  const SUPABASE_KEY =
+    "YOUR_SUPABASE_ANON_KEY";
 
-  const LOW = 1;
-  const HIGH = 100;
 
-  let currentCode = null;
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+
+  /* =========================================================
+     GAME SETTINGS
+  ========================================================= */
+
+  const TOTAL_ROUNDS = 3;
+
+  const MAX_ROUND_POINTS = 100;
+
+  const MIN_ROUND_POINTS = 10;
+
+
+  /* =========================================================
+     DOM
+  ========================================================= */
+
+  const homeScreen =
+    document.getElementById("homeScreen");
+
+  const gameScreen =
+    document.getElementById("gameScreen");
+
+  const duelGame =
+    document.getElementById("duelGame");
+
+  const crackGame =
+    document.getElementById("crackGame");
+
+  const duelModeBtn =
+    document.getElementById("duelModeBtn");
+
+  const crackModeBtn =
+    document.getElementById("crackModeBtn");
+
+  const createBtn =
+    document.getElementById("createBtn");
+
+  const joinBtn =
+    document.getElementById("joinBtn");
+
+  const joinCodeInput =
+    document.getElementById("joinCodeInput");
+
+  const homeMessage =
+    document.getElementById("homeMessage");
+
+  const roomCodeDisplay =
+    document.getElementById("roomCodeDisplay");
+
+  const gameStatus =
+    document.getElementById("gameStatus");
+
+  const myPlayerLabel =
+    document.getElementById("myPlayerLabel");
+
+  const opponentLabel =
+    document.getElementById("opponentLabel");
+
+  const roundNumber =
+    document.getElementById("roundNumber");
+
+  const myScore =
+    document.getElementById("myScore");
+
+  const opponentScore =
+    document.getElementById("opponentScore");
+
+  const backBtn =
+    document.getElementById("backBtn");
+
+  const duelSecretSection =
+    document.getElementById("duelSecretSection");
+
+  const duelGuessSection =
+    document.getElementById("duelGuessSection");
+
+  const duelSecretInput =
+    document.getElementById("duelSecretInput");
+
+  const setSecretBtn =
+    document.getElementById("setSecretBtn");
+
+  const duelGuessInput =
+    document.getElementById("duelGuessInput");
+
+  const duelGuessBtn =
+    document.getElementById("duelGuessBtn");
+
+  const duelTurn =
+    document.getElementById("duelTurn");
+
+  const duelHistory =
+    document.getElementById("duelHistory");
+
+  const crackTurn =
+    document.getElementById("crackTurn");
+
+  const crackSecretSection =
+    document.getElementById("crackSecretSection");
+
+  const crackGuessSection =
+    document.getElementById("crackGuessSection");
+
+  const crackSecretInput =
+    document.getElementById("crackSecretInput");
+
+  const setCrackSecretBtn =
+    document.getElementById("setCrackSecretBtn");
+
+  const crackGuessInput =
+    document.getElementById("crackGuessInput");
+
+  const crackGuessBtn =
+    document.getElementById("crackGuessBtn");
+
+  const cbMyHistory =
+    document.getElementById("cbMyHistory");
+
+  const roundResult =
+    document.getElementById("roundResult");
+
+  const winnerBox =
+    document.getElementById("winnerBox");
+
+
+  /* =========================================================
+     GAME VARIABLES
+  ========================================================= */
+
+  let selectedMode = "duel";
+
+  let roomCode = null;
+
   let myRole = null;
+
+  let currentState = null;
+
   let pollTimer = null;
 
-
-  /* =========================
-     SCREENS
-  ========================= */
-
-  const screens = {
-
-    mode:
-      document.getElementById(
-        'screen-mode'
-      ),
-
-    duelLanding:
-      document.getElementById(
-        'screen-duel-landing'
-      ),
-
-    hostSetup:
-      document.getElementById(
-        'screen-host-setup'
-      ),
-
-    hostWatch:
-      document.getElementById(
-        'screen-host-watch'
-      ),
-
-    joinSetup:
-      document.getElementById(
-        'screen-join-setup'
-      ),
-
-    joinSecret:
-      document.getElementById(
-        'screen-join-secret'
-      ),
-
-    duel:
-      document.getElementById(
-        'screen-duel'
-      ),
-
-    cbLanding:
-      document.getElementById(
-        'screen-cb-landing'
-      ),
-
-    cbHostWatch:
-      document.getElementById(
-        'screen-cb-host-watch'
-      ),
-
-    cbJoin:
-      document.getElementById(
-        'screen-cb-join'
-      ),
-
-    cbPlay:
-      document.getElementById(
-        'screen-cb-play'
-      )
-
-  };
+  let lastRoundResultKey = null;
 
 
-  function show(name) {
+  /* =========================================================
+     MODE
+  ========================================================= */
 
-    Object.values(
-      screens
-    ).forEach(
-      function (screen) {
+  duelModeBtn.addEventListener(
+    "click",
+    function () {
 
-        screen.classList.remove(
-          'active'
+      selectedMode = "duel";
+
+      duelModeBtn.classList.add("active");
+
+      crackModeBtn.classList.remove("active");
+
+    }
+  );
+
+
+  crackModeBtn.addEventListener(
+    "click",
+    function () {
+
+      selectedMode = "codebreaker";
+
+      crackModeBtn.classList.remove("active");
+
+      duelModeBtn.classList.remove("active");
+
+      crackModeBtn.classList.add("active");
+
+    }
+  );
+
+
+  /* =========================================================
+     HELPERS
+  ========================================================= */
+
+  function showHomeMessage(
+    message,
+    type = "error"
+  ) {
+
+    homeMessage.innerHTML = "";
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      type === "success"
+        ? "success"
+        : "error";
+
+    div.textContent =
+      message;
+
+    homeMessage.appendChild(div);
+  }
+
+
+  function generateRoomCode() {
+
+    const chars =
+      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    let result = "";
+
+    for (let i = 0; i < 6; i++) {
+
+      result +=
+        chars[
+          Math.floor(
+            Math.random() *
+            chars.length
+          )
+        ];
+
+    }
+
+    return result;
+  }
+
+
+  function isValidCode(code) {
+
+    return (
+      /^\d{4}$/.test(code) &&
+      new Set(
+        code.split("")
+      ).size === 4
+    );
+
+  }
+
+
+  function getOpponentRole() {
+
+    return myRole === "a"
+      ? "b"
+      : "a";
+
+  }
+
+
+  /*
+   * Fewer guesses = more points.
+   *
+   * Guess 1 = 100
+   * Guess 2 = 90
+   * Guess 3 = 80
+   * ...
+   *
+   * Minimum = 10.
+   */
+
+  function calculatePoints(
+    guessCount
+  ) {
+
+    return Math.max(
+      MIN_ROUND_POINTS,
+      MAX_ROUND_POINTS -
+      ((guessCount - 1) * 10)
+    );
+
+  }
+
+
+  /* =========================================================
+     CREATE INITIAL PLAYER
+  ========================================================= */
+
+  function createPlayerState() {
+
+    return {
+      secret: null,
+      secretSet: false,
+      guesses: [],
+      roundPoints: 0,
+      totalPoints: 0
+    };
+
+  }
+
+
+  /* =========================================================
+     CREATE ROOM
+  ========================================================= */
+
+  createBtn.addEventListener(
+    "click",
+    async function () {
+
+      createBtn.disabled = true;
+
+      try {
+
+        const code =
+          generateRoomCode();
+
+
+        const state = {
+
+          mode: selectedMode,
+
+          status: "waiting_for_join",
+
+          round: 1,
+
+          totalRounds: TOTAL_ROUNDS,
+
+          turn: "a",
+
+          winner: null,
+
+          roundWinner: null,
+
+          roundFinished: false,
+
+          a: createPlayerState(),
+
+          b: createPlayerState()
+
+        };
+
+
+        const { error } =
+          await supabaseClient
+            .from("duels")
+            .insert({
+
+              code: code,
+
+              state: state
+
+            });
+
+
+        if (error) {
+          throw error;
+        }
+
+
+        roomCode = code;
+
+        myRole = "a";
+
+        currentState = state;
+
+        openGame();
+
+        startPolling();
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+        showHomeMessage(
+          "Could not create room."
         );
 
       }
-    );
 
-    screens[name].classList.add(
-      'active'
-    );
+      finally {
 
-  }
+        createBtn.disabled = false;
 
+      }
 
-  /* =========================
-     SUPABASE ERROR
-  ========================= */
-
-  if (supabaseError) {
-
-    const banner =
-      document.createElement(
-        'div'
-      );
-
-    banner.className =
-      'setup-missing';
-
-    banner.style.marginBottom =
-      '20px';
-
-    banner.innerHTML =
-      '<strong>Heads up —</strong><br><br>' +
-      supabaseError +
-      '<br><br>' +
-      'You can still browse the screens, but creating or joining a game will not work until this is fixed.';
-
-    document
-      .getElementById('app')
-      .insertBefore(
-        banner,
-        document.getElementById(
-          'app'
-        ).firstChild
-      );
-
-  }
+    }
+  );
 
 
-  /* =========================
-     NAVIGATION
-  ========================= */
+  /* =========================================================
+     JOIN ROOM
+  ========================================================= */
 
-  document
-    .querySelectorAll('[data-back]')
-    .forEach(
-      function (el) {
+  joinBtn.addEventListener(
+    "click",
+    async function () {
 
-        el.addEventListener(
-          'click',
-          function () {
+      const code =
+        joinCodeInput.value
+          .trim()
+          .toUpperCase();
 
-            stopPolling();
 
-            show(
-              el.getAttribute(
-                'data-back'
-              )
+      if (!code) {
+
+        showHomeMessage(
+          "Enter a room code."
+        );
+
+        return;
+
+      }
+
+
+      joinBtn.disabled = true;
+
+
+      try {
+
+        const { data, error } =
+          await supabaseClient
+            .from("duels")
+            .select("*")
+            .eq("code", code)
+            .maybeSingle();
+
+
+        if (error) {
+          throw error;
+        }
+
+
+        if (!data) {
+
+          showHomeMessage(
+            "Room not found."
+          );
+
+          return;
+
+        }
+
+
+        const state =
+          data.state;
+
+
+        if (
+          state.status !==
+          "waiting_for_join"
+        ) {
+
+          showHomeMessage(
+            "This room is already full."
+          );
+
+          return;
+
+        }
+
+
+        /*
+         * Make sure old/partial state
+         * has all scoring fields.
+         */
+
+        if (!state.a) {
+          state.a =
+            createPlayerState();
+        }
+
+        if (!state.b) {
+          state.b =
+            createPlayerState();
+        }
+
+
+        myRole = "b";
+
+        roomCode = code;
+
+        currentState = state;
+
+
+        state.status =
+          "playing";
+
+
+        const { error: updateError } =
+          await supabaseClient
+            .from("duels")
+            .update({
+
+              state: state,
+
+              updated_at:
+                new Date().toISOString()
+
+            })
+            .eq(
+              "code",
+              code
             );
 
-          }
+
+        if (updateError) {
+          throw updateError;
+        }
+
+
+        openGame();
+
+        startPolling();
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+        showHomeMessage(
+          "Could not join room."
         );
 
       }
-    );
 
+      finally {
 
-  document
-    .getElementById('toHost')
-    .addEventListener(
-      'click',
-      function () {
-
-        show('hostSetup');
-
-      }
-    );
-
-
-  document
-    .getElementById('toJoin')
-    .addEventListener(
-      'click',
-      function () {
-
-        show('joinSetup');
-
-      }
-    );
-
-
-  document
-    .getElementById('toDuelMode')
-    .addEventListener(
-      'click',
-      function () {
-
-        show('duelLanding');
-
-      }
-    );
-
-
-  document
-    .getElementById(
-      'toCodebreakerMode'
-    )
-    .addEventListener(
-      'click',
-      function () {
-
-        show('cbLanding');
-
-      }
-    );
-
-
-  /* =========================
-     GAME CODE
-  ========================= */
-
-  function randomCode() {
-
-    return String(
-      Math.floor(
-        1000 +
-        Math.random() *
-        9000
-      )
-    );
-
-  }
-
-
-  async function fetchState(code) {
-
-    if (!supabase) {
-      return null;
-    }
-
-    try {
-
-      const result =
-        await supabase
-          .from('duels')
-          .select('state')
-          .eq('code', code)
-          .maybeSingle();
-
-      if (
-        result.error ||
-        !result.data
-      ) {
-
-        return null;
+        joinBtn.disabled = false;
 
       }
 
-      return result.data.state;
-
-    } catch (e) {
-
-      return null;
-
     }
-
-  }
-
-
-  async function insertGame(
-    code,
-    state
-  ) {
-
-    if (!supabase) {
-      return false;
-    }
-
-    try {
-
-      const result =
-        await supabase
-          .from('duels')
-          .insert({
-            code: code,
-            state: state
-          });
-
-      return !result.error;
-
-    } catch (e) {
-
-      return false;
-
-    }
-
-  }
+  );
 
 
-  async function updateGame(
-    code,
-    state
-  ) {
+  /* =========================================================
+     OPEN GAME
+  ========================================================= */
 
-    if (!supabase) {
-      return false;
-    }
+  function openGame() {
 
-    try {
+    homeScreen.classList.add(
+      "hidden"
+    );
 
-      const result =
-        await supabase
-          .from('duels')
-          .update({
-            state: state,
-            updated_at:
-              new Date().toISOString()
-          })
-          .eq('code', code);
-
-      return !result.error;
-
-    } catch (e) {
-
-      return false;
-
-    }
-
-  }
+    gameScreen.classList.remove(
+      "hidden"
+    );
 
 
-  async function generateUniqueCode() {
+    roomCodeDisplay.textContent =
+      roomCode;
 
-    let code =
-      randomCode();
 
-    let tries = 0;
+    myPlayerLabel.textContent =
+      myRole === "a"
+        ? "Player A"
+        : "Player B";
 
-    while (
-      (await fetchState(code)) &&
-      tries < 15
+
+    opponentLabel.textContent =
+      "Player " +
+      (
+        myRole === "a"
+          ? "B"
+          : "A"
+      );
+
+
+    if (
+      currentState.mode ===
+      "codebreaker"
     ) {
 
-      code =
-        randomCode();
+      duelGame.classList.add(
+        "hidden"
+      );
 
-      tries++;
+      crackGame.classList.remove(
+        "hidden"
+      );
 
     }
 
-    return code;
+    else {
+
+      crackGame.classList.add(
+        "hidden"
+      );
+
+      duelGame.classList.remove(
+        "hidden"
+      );
+
+    }
+
+
+    renderGame(
+      currentState
+    );
 
   }
 
 
-  function stopPolling() {
+  /* =========================================================
+     POLLING
+  ========================================================= */
+
+  function startPolling() {
 
     if (pollTimer) {
 
@@ -1315,1087 +1362,507 @@ window.addEventListener('error', function (e) {
         pollTimer
       );
 
-      pollTimer = null;
-
     }
 
-  }
-
-
-  function pollGame(
-    code,
-    onChange
-  ) {
-
-    stopPolling();
 
     pollTimer =
       setInterval(
-        async function () {
-
-          const state =
-            await fetchState(
-              code
-            );
-
-          if (state) {
-
-            onChange(state);
-
-          }
-
-        },
-        2000
+        loadGame,
+        1500
       );
+
+
+    loadGame();
 
   }
 
 
-  /* =====================================================
-     DUEL GAME
-  ===================================================== */
+  async function loadGame() {
 
-  const hostSecretInput =
-    document.getElementById(
-      'hostSecretInput'
-    );
-
-  const hostError =
-    document.getElementById(
-      'hostError'
-    );
-
-  const createGameBtn =
-    document.getElementById(
-      'createGameBtn'
-    );
-
-  const hostCodeDisplay =
-    document.getElementById(
-      'hostCodeDisplay'
-    );
-
-  const hostWaitStatus =
-    document.getElementById(
-      'hostWaitStatus'
-    );
+    if (!roomCode) {
+      return;
+    }
 
 
-  /* =========================
-     CREATE DUEL
-  ========================= */
+    try {
 
-  createGameBtn.addEventListener(
-    'click',
-    async function () {
-
-      const val =
-        Number(
-          hostSecretInput.value
-        );
-
-      if (
-        !Number.isInteger(val) ||
-        val < LOW ||
-        val > HIGH
-      ) {
-
-        hostError.textContent =
-          `Pick a whole number between ${LOW} and ${HIGH}`;
-
-        return;
-
-      }
-
-      hostError.textContent =
-        '';
-
-      createGameBtn.disabled =
-        true;
-
-      createGameBtn.textContent =
-        'Creating...';
-
-      const code =
-        await generateUniqueCode();
-
-      const state = {
-
-        mode: 'duel',
-
-        status:
-          'waiting_for_join',
-
-        turn: 'a',
-
-        winner: null,
-
-        a: {
-
-          secret: val,
-
-          low: LOW,
-
-          high: HIGH,
-
-          guesses: []
-
-        },
-
-        b: {
-
-          secret: null,
-
-          low: LOW,
-
-          high: HIGH,
-
-          guesses: []
-
-        }
-
-      };
+      const { data, error } =
+        await supabaseClient
+          .from("duels")
+          .select("*")
+          .eq("code", roomCode)
+          .maybeSingle();
 
 
-      const ok =
-        await insertGame(
-          code,
-          state
-        );
+      if (error) {
 
-
-      createGameBtn.disabled =
-        false;
-
-      createGameBtn.textContent =
-        'Create duel';
-
-
-      if (!ok) {
-
-        hostError.textContent =
-          'Could not create the game. Check your Supabase setup and try again.';
+        console.error(error);
 
         return;
 
       }
 
 
-      currentCode =
-        code;
-
-      myRole =
-        'a';
+      if (!data) {
+        return;
+      }
 
 
-      hostCodeDisplay.textContent =
-        code;
-
-      hostWaitStatus.textContent =
-        'Waiting for your opponent to join...';
-
-      hostSecretInput.value =
-        '';
-
-      show('hostWatch');
+      currentState =
+        data.state;
 
 
-      pollGame(
-        code,
-        function (newState) {
-
-          if (
-            newState.status ===
-              'playing' ||
-            newState.status ===
-              'won'
-          ) {
-
-            enterDuel(
-              newState
-            );
-
-          }
-
-        }
+      renderGame(
+        currentState
       );
 
     }
-  );
 
+    catch (error) {
 
-  /* =========================
-     JOIN DUEL
-  ========================= */
-
-  const codeInput =
-    document.getElementById(
-      'codeInput'
-    );
-
-  const joinError =
-    document.getElementById(
-      'joinError'
-    );
-
-  const checkCodeBtn =
-    document.getElementById(
-      'checkCodeBtn'
-    );
-
-  const joinSecretInput =
-    document.getElementById(
-      'joinSecretInput'
-    );
-
-  const joinSecretError =
-    document.getElementById(
-      'joinSecretError'
-    );
-
-  const startDuelBtn =
-    document.getElementById(
-      'startDuelBtn'
-    );
-
-  let pendingCode =
-    null;
-
-
-  checkCodeBtn.addEventListener(
-    'click',
-    async function () {
-
-      const code =
-        codeInput.value.trim();
-
-      if (
-        !/^\d{4}$/.test(code)
-      ) {
-
-        joinError.textContent =
-          'Enter the 4-digit code exactly as shared';
-
-        return;
-
-      }
-
-
-      checkCodeBtn.disabled =
-        true;
-
-      checkCodeBtn.textContent =
-        'Checking...';
-
-
-      const state =
-        await fetchState(
-          code
-        );
-
-
-      checkCodeBtn.disabled =
-        false;
-
-      checkCodeBtn.textContent =
-        'Continue';
-
-
-      if (!state) {
-
-        joinError.textContent =
-          'No game found with that code. Double-check it with your opponent.';
-
-        return;
-
-      }
-
-
-      if (
-        state.mode &&
-        state.mode !== 'duel'
-      ) {
-
-        joinError.textContent =
-          'That code belongs to a different game type.';
-
-        return;
-
-      }
-
-
-      if (
-        state.status !==
-        'waiting_for_join'
-      ) {
-
-        joinError.textContent =
-          'This duel already has two players.';
-
-        return;
-
-      }
-
-
-      joinError.textContent =
-        '';
-
-      pendingCode =
-        code;
-
-      show(
-        'joinSecret'
-      );
+      console.error(error);
 
     }
-  );
-
-
-  startDuelBtn.addEventListener(
-    'click',
-    async function () {
-
-      const val =
-        Number(
-          joinSecretInput.value
-        );
-
-
-      if (
-        !Number.isInteger(val) ||
-        val < LOW ||
-        val > HIGH
-      ) {
-
-        joinSecretError.textContent =
-          `Pick a whole number between ${LOW} and ${HIGH}`;
-
-        return;
-
-      }
-
-
-      joinSecretError.textContent =
-        '';
-
-      startDuelBtn.disabled =
-        true;
-
-      startDuelBtn.textContent =
-        'Starting...';
-
-
-      const state =
-        await fetchState(
-          pendingCode
-        );
-
-
-      if (
-        !state ||
-        state.status !==
-          'waiting_for_join'
-      ) {
-
-        joinSecretError.textContent =
-          'This duel is no longer available.';
-
-        startDuelBtn.disabled =
-          false;
-
-        startDuelBtn.textContent =
-          'Start duel';
-
-        return;
-
-      }
-
-
-      state.b.secret =
-        val;
-
-      state.status =
-        'playing';
-
-
-      const updated =
-        await updateGame(
-          pendingCode,
-          state
-        );
-
-
-      if (!updated) {
-
-        joinSecretError.textContent =
-          'Could not start the duel. Please try again.';
-
-        startDuelBtn.disabled =
-          false;
-
-        startDuelBtn.textContent =
-          'Start duel';
-
-        return;
-
-      }
-
-
-      currentCode =
-        pendingCode;
-
-      myRole =
-        'b';
-
-      joinSecretInput.value =
-        '';
-
-      startDuelBtn.disabled =
-        false;
-
-      startDuelBtn.textContent =
-        'Start duel';
-
-
-      enterDuel(
-        state
-      );
-
-    }
-  );
-
-
-  /* =========================
-     DUEL UI
-  ========================= */
-
-  const turnBadge =
-    document.getElementById(
-      'turnBadge'
-    );
-
-  const lowBound =
-    document.getElementById(
-      'lowBound'
-    );
-
-  const highBound =
-    document.getElementById(
-      'highBound'
-    );
-
-  const numberDisplay =
-    document.getElementById(
-      'numberDisplay'
-    );
-
-  const feedback =
-    document.getElementById(
-      'feedback'
-    );
-
-  const guessHistory =
-    document.getElementById(
-      'guessHistory'
-    );
-
-  const guessRow =
-    document.getElementById(
-      'guessRow'
-    );
-
-  const guessInput =
-    document.getElementById(
-      'guessInput'
-    );
-
-  const goBtn =
-    document.getElementById(
-      'goBtn'
-    );
-
-  const opponentNote =
-    document.getElementById(
-      'opponentNote'
-    );
-
-  const newDuelBtn =
-    document.getElementById(
-      'newDuelBtn'
-    );
-
-
-  function oppRole(role) {
-
-    return role === 'a'
-      ? 'b'
-      : 'a';
 
   }
 
 
-  /* =========================
-     RENDER DUEL
-  ========================= */
+  /* =========================================================
+     RENDER GAME
+  ========================================================= */
 
-  function renderDuel(
-    state
-  ) {
+  function renderGame(state) {
+
+    if (!state) {
+      return;
+    }
+
 
     const mine =
       state[myRole];
 
-    const opp =
+
+    const opponent =
       state[
-        oppRole(myRole)
+        getOpponentRole()
       ];
 
 
-    lowBound.textContent =
-      mine.low;
-
-    highBound.textContent =
-      mine.high;
+    roundNumber.textContent =
+      `${state.round} / ${state.totalRounds}`;
 
 
-    guessHistory.innerHTML =
-      '';
+    myScore.textContent =
+      mine.totalPoints || 0;
 
 
-    mine.guesses.forEach(
-      function (g) {
-
-        const chip =
-          document.createElement(
-            'span'
-          );
-
-        chip.textContent =
-          g.value;
-
-        guessHistory.appendChild(
-          chip
-        );
-
-      }
-    );
-
-
-    /* GAME OVER */
-
-    if (
-      state.status ===
-      'won'
-    ) {
-
-      stopPolling();
-
-      guessRow.style.display =
-        'none';
-
-      newDuelBtn.style.display =
-        'block';
-
-      turnBadge.textContent =
-        'Duel over';
-
-      turnBadge.className =
-        'turn-badge';
-
-
-      if (
-        state.winner ===
-        myRole
-      ) {
-
-        numberDisplay.textContent =
-          opp.secret;
-
-        numberDisplay.className =
-          'number win';
-
-        feedback.textContent =
-          `You guessed it in ${mine.guesses.length} guesses! 🎉`;
-
-      } else {
-
-        numberDisplay.textContent =
-          mine.secret;
-
-        numberDisplay.className =
-          'number lose';
-
-        feedback.textContent =
-          'Your opponent guessed your number first.';
-
-      }
-
-      opponentNote.textContent =
-        `Your secret was ${mine.secret}. Their secret was ${opp.secret}.`;
-
-      return;
-
-    }
-
-
-    /* GAME STILL PLAYING */
-
-    newDuelBtn.style.display =
-      'none';
-
-    opponentNote.textContent =
-      `Opponent has made ${opp.guesses.length} ${
-        opp.guesses.length === 1
-          ? 'guess'
-          : 'guesses'
-      } so far.`;
+    opponentScore.textContent =
+      opponent.totalPoints || 0;
 
 
     if (
-      state.turn ===
-      myRole
+      state.mode ===
+      "codebreaker"
     ) {
 
-      guessRow.style.display =
-        'flex';
-
-      turnBadge.textContent =
-        'Your turn';
-
-      turnBadge.className =
-        'turn-badge mine';
-
-
-      numberDisplay.textContent =
-        mine.guesses.length
-          ? mine.guesses[
-              mine.guesses.length - 1
-            ].value
-          : '?';
-
-      numberDisplay.className =
-        'number';
-
-
-      feedback.textContent =
-        mine.guesses.length
-          ? 'Go on, take your next shot'
-          : 'Make your first guess';
-
-
-      guessInput.disabled =
-        false;
-
-      goBtn.disabled =
-        false;
-
-    } else {
-
-      guessRow.style.display =
-        'flex';
-
-      turnBadge.textContent =
-        "Opponent's turn";
-
-      turnBadge.className =
-        'turn-badge';
-
-
-      numberDisplay.textContent =
-        mine.guesses.length
-          ? mine.guesses[
-              mine.guesses.length - 1
-            ].value
-          : '?';
-
-      numberDisplay.className =
-        'number';
-
-
-      feedback.textContent =
-        'Waiting for your opponent to guess...';
-
-
-      guessInput.disabled =
-        true;
-
-      goBtn.disabled =
-        true;
-
-    }
-
-  }
-
-
-  function enterDuel(
-    state
-  ) {
-
-    show('duel');
-
-    renderDuel(
-      state
-    );
-
-    pollGame(
-      currentCode,
-      function (newState) {
-
-        renderDuel(
-          newState
-        );
-
-      }
-    );
-
-  }
-
-
-  /* =========================
-     DUEL GUESS
-  ========================= */
-
-  goBtn.addEventListener(
-    'click',
-    async function () {
-
-      if (
-        !currentCode ||
-        !myRole
-      ) {
-
-        return;
-
-      }
-
-
-      const raw =
-        guessInput.value.trim();
-
-
-      if (raw === '') {
-        return;
-      }
-
-
-      const g =
-        Number(raw);
-
-
-      const state =
-        await fetchState(
-          currentCode
-        );
-
-
-      if (
-        !state ||
-        state.status !==
-          'playing' ||
-        state.turn !==
-          myRole
-      ) {
-
-        if (state) {
-
-          renderDuel(
-            state
-          );
-
-        }
-
-        return;
-
-      }
-
-
-      const mine =
-        state[myRole];
-
-      const opp =
-        state[
-          oppRole(myRole)
-        ];
-
-
-      if (
-        !Number.isInteger(g) ||
-        g < mine.low ||
-        g > mine.high
-      ) {
-
-        feedback.textContent =
-          `Enter a whole number between ${mine.low} and ${mine.high}`;
-
-        return;
-
-      }
-
-
-      let result;
-
-
-      if (
-        g ===
-        opp.secret
-      ) {
-
-        result =
-          'win';
-
-        state.status =
-          'won';
-
-        state.winner =
-          myRole;
-
-      } else if (
-        g <
-        opp.secret
-      ) {
-
-        result =
-          'higher';
-
-        mine.low =
-          Math.max(
-            mine.low,
-            g + 1
-          );
-
-      } else {
-
-        result =
-          'lower';
-
-        mine.high =
-          Math.min(
-            mine.high,
-            g - 1
-          );
-
-      }
-
-
-      mine.guesses.push({
-
-        value: g,
-
-        result: result
-
-      });
-
-
-      if (
-        state.status !==
-        'won'
-      ) {
-
-        state.turn =
-          oppRole(myRole);
-
-      }
-
-
-      guessInput.value =
-        '';
-
-
-      await updateGame(
-        currentCode,
+      renderCodebreaker(
         state
       );
 
+    }
+
+    else {
 
       renderDuel(
         state
       );
 
     }
-  );
 
 
-  guessInput.addEventListener(
-    'keydown',
-    function (e) {
+    if (
+      state.status ===
+      "waiting_for_join"
+    ) {
+
+      gameStatus.textContent =
+        "Waiting for your opponent to join...";
+
+    }
+
+    else if (
+      state.status ===
+      "finished"
+    ) {
+
+      gameStatus.textContent =
+        "Game finished";
+
+    }
+
+    else {
+
+      gameStatus.textContent =
+        `Round ${state.round} of ${state.totalRounds}`;
+
+    }
+
+
+    /*
+     * FINAL GAME WINNER
+     */
+
+    if (
+      state.winner
+    ) {
+
+      winnerBox.classList.remove(
+        "hidden"
+      );
+
+
+      const finalA =
+        state.a.totalPoints || 0;
+
+      const finalB =
+        state.b.totalPoints || 0;
+
 
       if (
-        e.key ===
-        'Enter'
+        finalA === finalB
       ) {
 
-        goBtn.click();
+        winnerBox.innerHTML = `
+          <div>🤝 Game Draw</div>
+          <div class="winner-score">
+            ${finalA} - ${finalB}
+          </div>
+        `;
+
+      }
+
+      else if (
+        state.winner === myRole
+      ) {
+
+        winnerBox.innerHTML = `
+          <div>🎉 You won the game!</div>
+          <div class="winner-score">
+            ${finalA} - ${finalB}
+          </div>
+        `;
+
+      }
+
+      else {
+
+        winnerBox.innerHTML = `
+          <div>Opponent won the game</div>
+          <div class="winner-score">
+            ${finalA} - ${finalB}
+          </div>
+        `;
 
       }
 
     }
-  );
 
+    else {
 
-  newDuelBtn.addEventListener(
-    'click',
-    function () {
-
-      stopPolling();
-
-      currentCode =
-        null;
-
-      myRole =
-        null;
-
-      codeInput.value =
-        '';
-
-      show('mode');
+      winnerBox.classList.add(
+        "hidden"
+      );
 
     }
-  );
-
-
-  /* =====================================================
-     CODEBREAKER
-  ===================================================== */
-
-  const cbToHostBtn =
-    document.getElementById(
-      'cbToHost'
-    );
-
-  const cbToJoinBtn =
-    document.getElementById(
-      'cbToJoin'
-    );
-
-  const cbHostCodeDisplay =
-    document.getElementById(
-      'cbHostCodeDisplay'
-    );
-
-  const cbHostWaitStatus =
-    document.getElementById(
-      'cbHostWaitStatus'
-    );
-
-  const cbCodeInput =
-    document.getElementById(
-      'cbCodeInput'
-    );
-
-  const cbJoinError =
-    document.getElementById(
-      'cbJoinError'
-    );
-
-  const cbJoinBtn =
-    document.getElementById(
-      'cbJoinBtn'
-    );
-
-  const cbTurnBadge =
-    document.getElementById(
-      'cbTurnBadge'
-    );
-
-  const cbNumberDisplay =
-    document.getElementById(
-      'cbNumberDisplay'
-    );
-
-  const cbFeedback =
-    document.getElementById(
-      'cbFeedback'
-    );
-
-  const cbGuessRow =
-    document.getElementById(
-      'cbGuessRow'
-    );
-
-  const cbGuessInput =
-    document.getElementById(
-      'cbGuessInput'
-    );
-
-  const cbGoBtn =
-    document.getElementById(
-      'cbGoBtn'
-    );
-
-  const cbMyHistory =
-    document.getElementById(
-      'cbMyHistory'
-    );
-
-  const cbNewGameBtn =
-    document.getElementById(
-      'cbNewGameBtn'
-    );
-
-
-  /* =========================
-     GENERATE SECRET
-  ========================= */
-
-  function generateSecretCode() {
-
-    const digits = [
-      '0',
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9'
-    ];
-
-
-    for (
-      let i =
-        digits.length - 1;
-      i > 0;
-      i--
-    ) {
-
-      const j =
-        Math.floor(
-          Math.random() *
-          (i + 1)
-        );
-
-
-      [
-        digits[i],
-        digits[j]
-      ] = [
-        digits[j],
-        digits[i]
-      ];
-
-    }
-
-
-    return digits
-      .slice(0, 4)
-      .join('');
 
   }
 
 
-  /* =========================
-     SCORE GUESS
-  ========================= */
+  /* =========================================================
+     ROUND RESULT
+  ========================================================= */
+
+  function renderRoundResult(
+    state
+  ) {
+
+    if (
+      !state.roundFinished ||
+      !state.roundWinner
+    ) {
+
+      roundResult.classList.add(
+        "hidden"
+      );
+
+      return;
+
+    }
+
+
+    const key =
+      `${state.round}-${state.roundWinner}-${state.a.totalPoints}-${state.b.totalPoints}`;
+
+
+    if (
+      key !== lastRoundResultKey
+    ) {
+
+      lastRoundResultKey =
+        key;
+
+    }
+
+
+    roundResult.classList.remove(
+      "hidden"
+    );
+
+
+    const roundWinner =
+      state.roundWinner;
+
+
+    const winnerName =
+      roundWinner === myRole
+        ? "You"
+        : "Opponent";
+
+
+    const winnerPoints =
+      state[
+        roundWinner
+      ].roundPoints || 0;
+
+
+    roundResult.innerHTML = `
+      <h3>
+        ${winnerName} won Round ${state.round}
+      </h3>
+
+      <p>
+        <span class="points-earned">
+          +${winnerPoints} points
+        </span>
+      </p>
+
+      <p>
+        Total score:
+        You ${state[myRole].totalPoints || 0}
+        -
+        Opponent ${state[getOpponentRole()].totalPoints || 0}
+      </p>
+    `;
+
+  }
+
+
+  /* =========================================================
+     CRACK MODE RENDER
+  ========================================================= */
+
+  function renderCodebreaker(
+    state
+  ) {
+
+    const mine =
+      state[myRole];
+
+
+    renderGuessList(
+      cbMyHistory,
+      mine.guesses
+    );
+
+
+    renderRoundResult(
+      state
+    );
+
+
+    /*
+     * Waiting for opponent
+     */
+
+    if (
+      state.status ===
+      "waiting_for_join"
+    ) {
+
+      crackSecretSection
+        .classList
+        .remove("hidden");
+
+      crackGuessSection
+        .classList
+        .add("hidden");
+
+      crackTurn.textContent =
+        "Waiting for your opponent to join...";
+
+      setCrackSecretBtn.disabled =
+        false;
+
+      return;
+
+    }
+
+
+    /*
+     * FINAL GAME
+     */
+
+    if (
+      state.winner
+    ) {
+
+      crackSecretSection
+        .classList
+        .add("hidden");
+
+      crackGuessSection
+        .classList
+        .add("hidden");
+
+      crackTurn.textContent =
+        "Game finished";
+
+      return;
+
+    }
+
+
+    /*
+     * ROUND FINISHED
+     */
+
+    if (
+      state.roundFinished
+    ) {
+
+      crackSecretSection
+        .classList
+        .add("hidden");
+
+      crackGuessSection
+        .classList
+        .add("hidden");
+
+      crackTurn.textContent =
+        `Round ${state.round} finished`;
+
+      return;
+
+    }
+
+
+    /*
+     * Secret has NOT been entered
+     */
+
+    if (
+      !mine.secretSet
+    ) {
+
+      crackSecretSection
+        .classList
+        .remove("hidden");
+
+      crackGuessSection
+        .classList
+        .add("hidden");
+
+      crackTurn.textContent =
+        "Create your secret code";
+
+      return;
+
+    }
+
+
+    /*
+     * Secret exists but opponent
+     * has not entered theirs.
+     */
+
+    const opponent =
+      state[
+        getOpponentRole()
+      ];
+
+
+    if (
+      !opponent.secretSet
+    ) {
+
+      crackSecretSection
+        .classList
+        .add("hidden");
+
+      crackGuessSection
+        .classList
+        .add("hidden");
+
+      crackTurn.textContent =
+        "Waiting for opponent to set their code";
+
+      return;
+
+    }
+
+
+    /*
+     * Normal turn
+     */
+
+    crackSecretSection
+      .classList
+      .add("hidden");
+
+    crackGuessSection
+      .classList
+      .remove("hidden");
+
+
+    if (
+      state.turn === myRole
+    ) {
+
+      crackTurn.textContent =
+        "Your turn";
+
+      crackGuessBtn.disabled =
+        false;
+
+    }
+
+    else {
+
+      crackTurn.textContent =
+        "Opponent's turn";
+
+      crackGuessBtn.disabled =
+        true;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     CRACK SCORE
+  ========================================================= */
 
   function scoreGuess(
     guess,
     secret
   ) {
 
-    let bulls =
-      0;
+    const details = [];
+
+    let bulls = 0;
+
+    let cows = 0;
 
 
     for (
@@ -2404,37 +1871,60 @@ window.addEventListener('error', function (e) {
       i++
     ) {
 
+      const digit =
+        guess[i];
+
+
       if (
-        guess[i] ===
-        secret[i]
+        digit === secret[i]
       ) {
 
         bulls++;
 
+        details.push({
+
+          digit: digit,
+
+          position: i + 1,
+
+          status:
+            "correct-position"
+
+        });
+
       }
 
-    }
-
-
-    let cows =
-      0;
-
-
-    for (
-      let i = 0;
-      i < 4;
-      i++
-    ) {
-
-      if (
-        guess[i] !==
-          secret[i] &&
-        secret.includes(
-          guess[i]
-        )
+      else if (
+        secret.includes(digit)
       ) {
 
         cows++;
+
+        details.push({
+
+          digit: digit,
+
+          position: i + 1,
+
+          status:
+            "correct-wrong-position"
+
+        });
+
+      }
+
+      else {
+
+        details.push({
+
+          digit: digit,
+
+          position: i + 1,
+
+          status:
+            "not-in-code"
+
+        });
 
       }
 
@@ -2442,297 +1932,36 @@ window.addEventListener('error', function (e) {
 
 
     return {
-
-      bulls:
-        bulls,
-
-      cows:
-        cows
-
+      bulls,
+      cows,
+      details
     };
 
   }
 
 
-  /* =========================
-     CREATE CODEBREAKER ROOM
-  ========================= */
-
-  cbToHostBtn.addEventListener(
-    'click',
-    async function () {
-
-      cbToHostBtn.disabled =
-        true;
-
-      const code =
-        await generateUniqueCode();
-
-
-      const state = {
-
-        mode:
-          'codebreaker',
-
-        status:
-          'waiting_for_join',
-
-        turn:
-          'a',
-
-        winner:
-          null,
-
-        secret:
-          generateSecretCode(),
-
-        a: {
-
-          guesses: []
-
-        },
-
-        b: {
-
-          guesses: []
-
-        }
-
-      };
-
-
-      const ok =
-        await insertGame(
-          code,
-          state
-        );
-
-
-      cbToHostBtn.disabled =
-        false;
-
-
-      if (!ok) {
-
-        alert(
-          'Could not create the room. Check your Supabase setup and try again.'
-        );
-
-        return;
-
-      }
-
-
-      currentCode =
-        code;
-
-      myRole =
-        'a';
-
-
-      cbHostCodeDisplay.textContent =
-        code;
-
-      cbHostWaitStatus.textContent =
-        'Waiting for your opponent to join...';
-
-
-      show(
-        'cbHostWatch'
-      );
-
-
-      pollGame(
-        code,
-        function (newState) {
-
-          if (
-            newState.status ===
-              'playing' ||
-            newState.status ===
-              'won'
-          ) {
-
-            enterCodebreaker(
-              newState
-            );
-
-          }
-
-        }
-      );
-
-    }
-  );
-
-
-  cbToJoinBtn.addEventListener(
-    'click',
-    function () {
-
-      show(
-        'cbJoin'
-      );
-
-    }
-  );
-
-
-  /* =========================
-     JOIN CODEBREAKER
-  ========================= */
-
-  cbJoinBtn.addEventListener(
-    'click',
-    async function () {
-
-      const code =
-        cbCodeInput.value.trim();
-
-
-      if (
-        !/^\d{4}$/.test(code)
-      ) {
-
-        cbJoinError.textContent =
-          'Enter the 4-digit code exactly as shared';
-
-        return;
-
-      }
-
-
-      cbJoinBtn.disabled =
-        true;
-
-      cbJoinBtn.textContent =
-        'Joining...';
-
-
-      const state =
-        await fetchState(
-          code
-        );
-
-
-      cbJoinBtn.disabled =
-        false;
-
-      cbJoinBtn.textContent =
-        'Join room';
-
-
-      if (!state) {
-
-        cbJoinError.textContent =
-          'No room found with that code. Double-check it with your opponent.';
-
-        return;
-
-      }
-
-
-      if (
-        state.mode !==
-        'codebreaker'
-      ) {
-
-        cbJoinError.textContent =
-          'That code belongs to a different game type.';
-
-        return;
-
-      }
-
-
-      if (
-        state.status !==
-        'waiting_for_join'
-      ) {
-
-        cbJoinError.textContent =
-          'This room already has two players.';
-
-        return;
-
-      }
-
-
-      cbJoinError.textContent =
-        '';
-
-
-      state.status =
-        'playing';
-
-
-      const updated =
-        await updateGame(
-          code,
-          state
-        );
-
-
-      if (!updated) {
-
-        cbJoinError.textContent =
-          'Could not join the room. Please try again.';
-
-        return;
-
-      }
-
-
-      currentCode =
-        code;
-
-      myRole =
-        'b';
-
-      cbCodeInput.value =
-        '';
-
-
-      enterCodebreaker(
-        state
-      );
-
-    }
-  );
-
-
-  /* =========================
-     RENDER YOUR GUESS LIST
-     ONLY
-  ========================= */
+  /* =========================================================
+     RENDER CRACK HISTORY
+  ========================================================= */
 
   function renderGuessList(
     container,
     guesses
   ) {
 
-    container.innerHTML =
-      '';
+    container.innerHTML = "";
 
 
     if (
-      !guesses.length
+      !guesses ||
+      guesses.length === 0
     ) {
 
-      const empty =
-        document.createElement(
-          'div'
-        );
-
-      empty.className =
-        'cb-empty';
-
-      empty.textContent =
-        'No guesses yet';
-
-      container.appendChild(
-        empty
-      );
+      container.innerHTML = `
+        <div class="empty-state">
+          No guesses yet
+        </div>
+      `;
 
       return;
 
@@ -2744,43 +1973,708 @@ window.addEventListener('error', function (e) {
 
         const row =
           document.createElement(
-            'div'
+            "div"
           );
+
 
         row.className =
-          'cb-guess-row';
+          "cb-guess-row";
 
 
-        const codeSpan =
+        const code =
           document.createElement(
-            'span'
+            "div"
           );
 
-        codeSpan.className =
-          'code';
 
-        codeSpan.textContent =
+        code.className =
+          "cb-code";
+
+
+        code.textContent =
           g.value;
 
 
-        const fbSpan =
+        const summary =
           document.createElement(
-            'span'
+            "div"
           );
 
-        fbSpan.className =
-          'fb';
 
-        fbSpan.textContent =
-          `${g.bulls} right spot - ${g.cows} right digit`;
+        summary.className =
+          "cb-summary";
+
+
+        summary.textContent =
+          `${g.bulls} right spot • ${g.cows} right digit`;
 
 
         row.appendChild(
-          codeSpan
+          code
         );
 
+
         row.appendChild(
-          fbSpan
+          summary
+        );
+
+
+        if (
+          Array.isArray(
+            g.details
+          )
+        ) {
+
+          const details =
+            document.createElement(
+              "div"
+            );
+
+
+          details.className =
+            "cb-digit-details";
+
+
+          g.details.forEach(
+            function (d) {
+
+              const item =
+                document.createElement(
+                  "div"
+                );
+
+
+              item.className =
+                "cb-digit-result";
+
+
+              if (
+                d.status ===
+                "correct-position"
+              ) {
+
+                item.classList.add(
+                  "correct-position"
+                );
+
+
+                item.textContent =
+                  `${d.digit} ✓ Correct digit • Correct position`;
+
+              }
+
+              else if (
+                d.status ===
+                "correct-wrong-position"
+              ) {
+
+                item.classList.add(
+                  "wrong-position"
+                );
+
+
+                item.textContent =
+                  `${d.digit} ✓ Correct digit • Wrong position`;
+
+              }
+
+              else {
+
+                item.classList.add(
+                  "not-found"
+                );
+
+
+                item.textContent =
+                  `${d.digit} ✕ Not in code`;
+
+              }
+
+
+              details.appendChild(
+                item
+              );
+
+            }
+          );
+
+
+          row.appendChild(
+            details
+          );
+
+        }
+
+
+        container.appendChild(
+          row
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     SET CRACK SECRET
+  ========================================================= */
+
+  setCrackSecretBtn.addEventListener(
+    "click",
+    async function () {
+
+      const value =
+        crackSecretInput.value.trim();
+
+
+      if (
+        !isValidCode(value)
+      ) {
+
+        alert(
+          "Enter exactly 4 different digits."
+        );
+
+        return;
+
+      }
+
+
+      if (
+        currentState[
+          myRole
+        ].secretSet
+      ) {
+
+        return;
+
+      }
+
+
+      currentState[
+        myRole
+      ].secret =
+        value;
+
+
+      currentState[
+        myRole
+      ].secretSet =
+        true;
+
+
+      const { error } =
+        await supabaseClient
+          .from("duels")
+          .update({
+
+            state:
+              currentState,
+
+            updated_at:
+              new Date().toISOString()
+
+          })
+          .eq(
+            "code",
+            roomCode
+          );
+
+
+      if (error) {
+
+        console.error(error);
+
+        alert(
+          "Could not save your secret."
+        );
+
+        return;
+
+      }
+
+
+      crackSecretInput.value =
+        "";
+
+
+      renderGame(
+        currentState
+      );
+
+    }
+  );
+
+
+  /* =========================================================
+     CRACK GUESS
+  ========================================================= */
+
+  crackGuessBtn.addEventListener(
+    "click",
+    submitCrackGuess
+  );
+
+
+  crackGuessInput.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key === "Enter"
+      ) {
+
+        submitCrackGuess();
+
+      }
+
+    }
+  );
+
+
+  async function submitCrackGuess() {
+
+    if (!currentState) {
+      return;
+    }
+
+
+    if (
+      currentState.winner ||
+      currentState.roundFinished
+    ) {
+
+      return;
+
+    }
+
+
+    if (
+      currentState.turn !==
+      myRole
+    ) {
+
+      return;
+
+    }
+
+
+    const raw =
+      crackGuessInput.value.trim();
+
+
+    if (
+      !isValidCode(raw)
+    ) {
+
+      alert(
+        "Enter exactly 4 different digits."
+      );
+
+      return;
+
+    }
+
+
+    const opponentRole =
+      getOpponentRole();
+
+
+    const opponentSecret =
+      currentState[
+        opponentRole
+      ].secret;
+
+
+    if (
+      !opponentSecret
+    ) {
+
+      alert(
+        "Opponent has not set a secret yet."
+      );
+
+      return;
+
+    }
+
+
+    const result =
+      scoreGuess(
+        raw,
+        opponentSecret
+      );
+
+
+    currentState[
+      myRole
+    ].guesses.push({
+
+      value: raw,
+
+      bulls:
+        result.bulls,
+
+      cows:
+        result.cows,
+
+      details:
+        result.details
+
+    });
+
+
+    /*
+     * CODE CRACKED
+     */
+
+    if (
+      result.bulls === 4
+    ) {
+
+      const points =
+        calculatePoints(
+          currentState[
+            myRole
+          ].guesses.length
+        );
+
+
+      currentState[
+        myRole
+      ].roundPoints =
+        points;
+
+
+      currentState[
+        myRole
+      ].totalPoints =
+        (
+          currentState[
+            myRole
+          ].totalPoints || 0
+        ) + points;
+
+
+      currentState.roundWinner =
+        myRole;
+
+
+      currentState.roundFinished =
+        true;
+
+
+      /*
+       * Final round
+       */
+
+      if (
+        currentState.round >=
+        currentState.totalRounds
+      ) {
+
+        finishGame();
+
+      }
+
+      else {
+
+        await saveState();
+
+        /*
+         * Give both players a moment
+         * to see round result.
+         */
+
+        setTimeout(
+          startNextRound,
+          3500
+        );
+
+      }
+
+    }
+
+    else {
+
+      /*
+       * Continue turn
+       */
+
+      currentState.turn =
+        opponentRole;
+
+
+      await saveState();
+
+    }
+
+
+    crackGuessInput.value =
+      "";
+
+
+    renderGame(
+      currentState
+    );
+
+  }
+
+
+  /* =========================================================
+     DUEL RENDER
+  ========================================================= */
+
+  function renderDuel(
+    state
+  ) {
+
+    const mine =
+      state[myRole];
+
+
+    const opponent =
+      state[
+        getOpponentRole()
+      ];
+
+
+    renderDuelHistory(
+      duelHistory,
+      mine.guesses
+    );
+
+
+    renderRoundResult(
+      state
+    );
+
+
+    if (
+      state.status ===
+      "waiting_for_join"
+    ) {
+
+      duelTurn.textContent =
+        "Waiting for your opponent to join...";
+
+      return;
+
+    }
+
+
+    /*
+     * Final game
+     */
+
+    if (
+      state.winner
+    ) {
+
+      duelSecretSection
+        .classList
+        .add("hidden");
+
+      duelGuessSection
+        .classList
+        .add("hidden");
+
+      duelTurn.textContent =
+        "Game finished";
+
+      return;
+
+    }
+
+
+    /*
+     * Round finished
+     */
+
+    if (
+      state.roundFinished
+    ) {
+
+      duelSecretSection
+        .classList
+        .add("hidden");
+
+      duelGuessSection
+        .classList
+        .add("hidden");
+
+      duelTurn.textContent =
+        `Round ${state.round} finished`;
+
+      return;
+
+    }
+
+
+    /*
+     * Secret not set
+     */
+
+    if (
+      !mine.secretSet
+    ) {
+
+      duelSecretSection
+        .classList
+        .remove("hidden");
+
+      duelGuessSection
+        .classList
+        .add("hidden");
+
+      duelTurn.textContent =
+        "Set your secret number";
+
+      return;
+
+    }
+
+
+    /*
+     * Waiting for opponent
+     */
+
+    if (
+      !opponent.secretSet
+    ) {
+
+      duelSecretSection
+        .classList
+        .add("hidden");
+
+      duelGuessSection
+        .classList
+        .add("hidden");
+
+      duelTurn.textContent =
+        "Waiting for opponent to set their number";
+
+      return;
+
+    }
+
+
+    /*
+     * Guessing
+     */
+
+    duelSecretSection
+      .classList
+      .add("hidden");
+
+    duelGuessSection
+      .classList
+      .remove("hidden");
+
+
+    if (
+      state.turn ===
+      myRole
+    ) {
+
+      duelTurn.textContent =
+        "Your turn";
+
+      duelGuessBtn.disabled =
+        false;
+
+    }
+
+    else {
+
+      duelTurn.textContent =
+        "Opponent's turn";
+
+      duelGuessBtn.disabled =
+        true;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     DUEL HISTORY
+  ========================================================= */
+
+  function renderDuelHistory(
+    container,
+    guesses
+  ) {
+
+    container.innerHTML = "";
+
+
+    if (
+      !guesses ||
+      guesses.length === 0
+    ) {
+
+      container.innerHTML = `
+        <div class="empty-state">
+          No guesses yet
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    guesses.forEach(
+      function (g) {
+
+        const row =
+          document.createElement(
+            "div"
+          );
+
+
+        row.className =
+          "cb-guess-row";
+
+
+        const code =
+          document.createElement(
+            "div"
+          );
+
+
+        code.className =
+          "cb-code";
+
+
+        code.textContent =
+          g.value;
+
+
+        const feedback =
+          document.createElement(
+            "div"
+          );
+
+
+        feedback.className =
+          "cb-summary";
+
+
+        feedback.textContent =
+          g.feedback;
+
+
+        row.appendChild(
+          code
+        );
+
+
+        row.appendChild(
+          feedback
         );
 
 
@@ -2794,366 +2688,483 @@ window.addEventListener('error', function (e) {
   }
 
 
-  /* =========================
-     RENDER CODEBREAKER
-  ========================= */
+  /* =========================================================
+     SET DUEL SECRET
+  ========================================================= */
 
-  function renderCodebreaker(
-    state
-  ) {
+  setSecretBtn.addEventListener(
+    "click",
+    async function () {
 
-    const mine =
-      state[myRole];
-
-
-    /*
-      IMPORTANT:
-      Opponent guesses are NOT
-      rendered or displayed.
-    */
-
-
-    renderGuessList(
-      cbMyHistory,
-      mine.guesses
-    );
-
-
-    /* =========================
-       GAME OVER
-    ========================= */
-
-    if (
-      state.status ===
-      'won'
-    ) {
-
-      stopPolling();
-
-      cbGuessRow.style.display =
-        'none';
-
-      cbNewGameBtn.style.display =
-        'block';
-
-      cbTurnBadge.textContent =
-        'Game over';
-
-      cbTurnBadge.className =
-        'turn-badge';
-
-
-      cbNumberDisplay.textContent =
-        state.secret;
+      const value =
+        Number(
+          duelSecretInput.value
+        );
 
 
       if (
-        state.winner ===
-        myRole
+        !Number.isInteger(value) ||
+        value < 1 ||
+        value > 100
       ) {
 
-        cbNumberDisplay.className =
-          'number win';
+        alert(
+          "Enter a number from 1 to 100."
+        );
 
-        cbFeedback.textContent =
-          `You cracked it in ${mine.guesses.length} guesses! 🎉`;
-
-      } else {
-
-        cbNumberDisplay.className =
-          'number lose';
-
-        cbFeedback.textContent =
-          'Your opponent cracked the code first.';
+        return;
 
       }
+
+
+      currentState[
+        myRole
+      ].secret =
+        value;
+
+
+      currentState[
+        myRole
+      ].secretSet =
+        true;
+
+
+      await saveState();
+
+
+      duelSecretInput.value =
+        "";
+
+
+      renderGame(
+        currentState
+      );
+
+    }
+  );
+
+
+  /* =========================================================
+     DUEL GUESS
+  ========================================================= */
+
+  duelGuessBtn.addEventListener(
+    "click",
+    submitDuelGuess
+  );
+
+
+  duelGuessInput.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key === "Enter"
+      ) {
+
+        submitDuelGuess();
+
+      }
+
+    }
+  );
+
+
+  async function submitDuelGuess() {
+
+    if (!currentState) {
+      return;
+    }
+
+
+    if (
+      currentState.winner ||
+      currentState.roundFinished
+    ) {
 
       return;
 
     }
 
 
-    /* =========================
-       GAME PLAYING
-    ========================= */
-
-    cbNewGameBtn.style.display =
-      'none';
-
-    cbGuessRow.style.display =
-      'flex';
-
-
-    const lastMine =
-      mine.guesses.length
-        ? mine.guesses[
-            mine.guesses.length - 1
-          ]
-        : null;
-
-
-    cbNumberDisplay.textContent =
-      lastMine
-        ? lastMine.value
-        : '????';
-
-    cbNumberDisplay.className =
-      'number';
-
-
     if (
-      state.turn ===
+      currentState.turn !==
       myRole
     ) {
 
-      cbTurnBadge.textContent =
-        'Your turn';
+      return;
 
-      cbTurnBadge.className =
-        'turn-badge mine';
+    }
 
 
-      cbFeedback.textContent =
-        lastMine
-          ? `Last guess: ${lastMine.bulls} right spot, ${lastMine.cows} right digit`
-          : 'Make your first guess';
+    const value =
+      Number(
+        duelGuessInput.value
+      );
 
 
-      cbGuessInput.disabled =
-        false;
+    if (
+      !Number.isInteger(value) ||
+      value < 1 ||
+      value > 100
+    ) {
 
-      cbGoBtn.disabled =
-        false;
+      alert(
+        "Enter a number from 1 to 100."
+      );
 
-    } else {
+      return;
 
-      cbTurnBadge.textContent =
-        "Opponent's turn";
-
-      cbTurnBadge.className =
-        'turn-badge';
-
-
-      cbFeedback.textContent =
-        'Waiting for your opponent to guess...';
+    }
 
 
-      cbGuessInput.disabled =
+    const opponentRole =
+      getOpponentRole();
+
+
+    const secret =
+      currentState[
+        opponentRole
+      ].secret;
+
+
+    let feedback;
+
+
+    if (
+      value === secret
+    ) {
+
+      feedback =
+        "🎯 Correct!";
+
+    }
+
+    else if (
+      value < secret
+    ) {
+
+      feedback =
+        "Too low";
+
+    }
+
+    else {
+
+      feedback =
+        "Too high";
+
+    }
+
+
+    currentState[
+      myRole
+    ].guesses.push({
+
+      value:
+        value,
+
+      feedback:
+        feedback
+
+    });
+
+
+    /*
+     * Correct answer
+     */
+
+    if (
+      value === secret
+    ) {
+
+      const points =
+        calculatePoints(
+          currentState[
+            myRole
+          ].guesses.length
+        );
+
+
+      currentState[
+        myRole
+      ].roundPoints =
+        points;
+
+
+      currentState[
+        myRole
+      ].totalPoints =
+        (
+          currentState[
+            myRole
+          ].totalPoints || 0
+        ) + points;
+
+
+      currentState.roundWinner =
+        myRole;
+
+
+      currentState.roundFinished =
         true;
 
-      cbGoBtn.disabled =
-        true;
+
+      if (
+        currentState.round >=
+        currentState.totalRounds
+      ) {
+
+        finishGame();
+
+      }
+
+      else {
+
+        await saveState();
+
+
+        setTimeout(
+          startNextRound,
+          3500
+        );
+
+      }
+
+    }
+
+    else {
+
+      currentState.turn =
+        opponentRole;
+
+
+      await saveState();
+
+    }
+
+
+    duelGuessInput.value =
+      "";
+
+
+    renderGame(
+      currentState
+    );
+
+  }
+
+
+  /* =========================================================
+     SAVE
+  ========================================================= */
+
+  async function saveState() {
+
+    const { error } =
+      await supabaseClient
+        .from("duels")
+        .update({
+
+          state:
+            currentState,
+
+          updated_at:
+            new Date().toISOString()
+
+        })
+        .eq(
+          "code",
+          roomCode
+        );
+
+
+    if (error) {
+
+      console.error(
+        "Save error:",
+        error
+      );
+
+      throw error;
 
     }
 
   }
 
 
-  function enterCodebreaker(
-    state
-  ) {
+  /* =========================================================
+     START NEXT ROUND
+  ========================================================= */
 
-    show(
-      'cbPlay'
-    );
+  async function startNextRound() {
 
-    renderCodebreaker(
-      state
-    );
+    /*
+     * Another player may have already
+     * started the next round.
+     */
 
-    pollGame(
-      currentCode,
-      function (newState) {
+    if (
+      !currentState ||
+      !currentState.roundFinished ||
+      currentState.winner
+    ) {
 
-        renderCodebreaker(
-          newState
-        );
+      return;
 
-      }
+    }
+
+
+    currentState.round += 1;
+
+    currentState.roundWinner =
+      null;
+
+    currentState.roundFinished =
+      false;
+
+    currentState.turn =
+      "a";
+
+
+    /*
+     * Reset both players' round data.
+     * Keep total score.
+     */
+
+    currentState.a.secret =
+      null;
+
+    currentState.a.secretSet =
+      false;
+
+    currentState.a.guesses =
+      [];
+
+    currentState.a.roundPoints =
+      0;
+
+
+    currentState.b.secret =
+      null;
+
+    currentState.b.secretSet =
+      false;
+
+    currentState.b.guesses =
+      [];
+
+    currentState.b.roundPoints =
+      0;
+
+
+    await saveState();
+
+
+    renderGame(
+      currentState
     );
 
   }
 
 
-  /* =========================
-     CODEBREAKER GUESS
-  ========================= */
+  /* =========================================================
+     FINISH GAME
+  ========================================================= */
 
-  cbGoBtn.addEventListener(
-    'click',
-    async function () {
+  function finishGame() {
 
-      if (
-        !currentCode ||
-        !myRole
-      ) {
-
-        return;
-
-      }
+    const aScore =
+      currentState.a.totalPoints ||
+      0;
 
 
-      const raw =
-        cbGuessInput.value.trim();
+    const bScore =
+      currentState.b.totalPoints ||
+      0;
 
 
-      if (
-        !/^\d{4}$/.test(raw)
-      ) {
+    if (
+      aScore === bScore
+    ) {
 
-        cbFeedback.textContent =
-          'Enter exactly 4 digits';
-
-        return;
-
-      }
-
-
-      if (
-        new Set(
-          raw.split('')
-        ).size !== 4
-      ) {
-
-        cbFeedback.textContent =
-          'Use 4 different digits';
-
-        return;
-
-      }
-
-
-      const state =
-        await fetchState(
-          currentCode
-        );
-
-
-      if (
-        !state ||
-        state.status !==
-          'playing' ||
-        state.turn !==
-          myRole
-      ) {
-
-        if (state) {
-
-          renderCodebreaker(
-            state
-          );
-
-        }
-
-        return;
-
-      }
-
-
-      const result =
-        scoreGuess(
-          raw,
-          state.secret
-        );
-
-
-      state[myRole]
-        .guesses
-        .push({
-
-          value:
-            raw,
-
-          bulls:
-            result.bulls,
-
-          cows:
-            result.cows
-
-        });
-
-
-      if (
-        result.bulls ===
-        4
-      ) {
-
-        state.status =
-          'won';
-
-        state.winner =
-          myRole;
-
-      } else {
-
-        state.turn =
-          oppRole(myRole);
-
-      }
-
-
-      cbGuessInput.value =
-        '';
-
-
-      await updateGame(
-        currentCode,
-        state
-      );
-
-
-      renderCodebreaker(
-        state
-      );
+      currentState.winner =
+        "draw";
 
     }
-  );
 
+    else if (
+      aScore > bScore
+    ) {
 
-  cbGuessInput.addEventListener(
-    'keydown',
-    function (e) {
-
-      if (
-        e.key ===
-        'Enter'
-      ) {
-
-        cbGoBtn.click();
-
-      }
+      currentState.winner =
+        "a";
 
     }
-  );
+
+    else {
+
+      currentState.winner =
+        "b";
+
+    }
 
 
-  /* =========================
-     NEW CODEBREAKER GAME
-  ========================= */
+    currentState.status =
+      "finished";
 
-  cbNewGameBtn.addEventListener(
-    'click',
+  }
+
+
+  /* =========================================================
+     LEAVE GAME
+  ========================================================= */
+
+  backBtn.addEventListener(
+    "click",
     function () {
 
-      stopPolling();
+      if (pollTimer) {
 
-      currentCode =
+        clearInterval(
+          pollTimer
+        );
+
+        pollTimer = null;
+
+      }
+
+
+      roomCode = null;
+
+      myRole = null;
+
+      currentState = null;
+
+      lastRoundResultKey =
         null;
 
-      myRole =
-        null;
 
-      cbCodeInput.value =
-        '';
+      gameScreen
+        .classList
+        .add("hidden");
 
-      show(
-        'mode'
-      );
+
+      homeScreen
+        .classList
+        .remove("hidden");
+
+
+      joinCodeInput.value =
+        "";
+
+
+      homeMessage.innerHTML =
+        "";
 
     }
   );
 
-})();
 </script>
 
 </body>
