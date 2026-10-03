@@ -509,7 +509,6 @@ window.addEventListener('error', function(e){
     joinSecretError.textContent = '';
     startDuelBtn.disabled = true;
     startDuelBtn.textContent = 'Starting...';
-​
     const state = await fetchState(pendingCode);
     if (!state || state.status !== 'waiting_for_join'){
       joinSecretError.textContent = 'This duel is no longer available.';
@@ -623,7 +622,6 @@ window.addEventListener('error', function(e){
       mine.high = Math.min(mine.high, g - 1);
     }
     mine.guesses.push({ value: g, result: result });
-​
     if (state.status !== 'won'){
       state.turn = oppRole(myRole);
     }
