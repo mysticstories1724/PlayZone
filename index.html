@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-
+​
   :root{
     --ink: #1b1a2e;
     --paper: #f6f3ec;
@@ -116,13 +116,33 @@
     font-size: 0.88rem; line-height: 1.6;
   }
   .setup-missing code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px; }
+  .section-label { font-size: 0.78rem; color: #8a8798; margin: 18px 0 8px; text-align: left; }
+  .cb-guess-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; border-radius: 8px; background: rgba(27,26,46,0.05);
+    margin-bottom: 6px; font-size: 0.85rem;
+  }
+  .cb-guess-row .code { font-family: 'IBM Plex Mono', monospace; font-weight: 600; letter-spacing: 0.08em; }
+  .cb-guess-row .fb { color: #5c5a72; font-size: 0.76rem; }
+  .cb-empty { font-size: 0.8rem; color: #a7a4b8; padding: 6px 2px; }
 </style>
 </head>
 <body>
 <div class="stage" id="app">
-
-  <!-- LANDING -->
-  <div class="screen active" id="screen-landing">
+​
+  <!-- MODE SELECT -->
+  <div class="screen active" id="screen-mode">
+    <h1>Pick a game</h1>
+    <p class="sub">Two players, two ways to play. Choose which one.</p>
+    <div class="choice-row">
+      <button class="choice-btn" id="toDuelMode"><span class="big">Duel</span>Guess each other's number</button>
+      <button class="choice-btn" id="toCodebreakerMode"><span class="big">Crack</span>Guess the system's code</button>
+    </div>
+  </div>
+​
+  <!-- DUEL LANDING -->
+  <div class="screen" id="screen-duel-landing">
+    <span class="back-link" data-back="mode">&larr; back</span>
     <h1>Number duel</h1>
     <p class="sub">Each player picks a secret number from 1 to 100, then you take turns guessing each other's. First to crack it wins.</p>
     <div class="choice-row">
@@ -130,10 +150,10 @@
       <button class="choice-btn" id="toJoin"><span class="big">Join</span>Enter a code</button>
     </div>
   </div>
-
+​
   <!-- HOST SETUP -->
   <div class="screen" id="screen-host-setup">
-    <span class="back-link" data-back="landing">&larr; back</span>
+    <span class="back-link" data-back="duelLanding">&larr; back</span>
     <h1>Pick your secret</h1>
     <p class="sub">Choose a whole number from 1 to 100. Your opponent will only get higher / lower hints.</p>
     <div class="field">
@@ -143,7 +163,7 @@
     <div class="error-text" id="hostError"></div>
     <button class="primary" id="createGameBtn">Create duel</button>
   </div>
-
+​
   <!-- HOST WAITING -->
   <div class="screen" id="screen-host-watch">
     <h1>Share this code</h1>
@@ -156,10 +176,10 @@
       <div class="status-line" id="hostWaitStatus">Waiting for your opponent to join…</div>
     </div>
   </div>
-
+​
   <!-- JOIN SETUP -->
   <div class="screen" id="screen-join-setup">
-    <span class="back-link" data-back="landing">&larr; back</span>
+    <span class="back-link" data-back="duelLanding">&larr; back</span>
     <h1>Enter the code</h1>
     <p class="sub">Ask your opponent for the 4-digit duel code they created.</p>
     <div class="field">
@@ -169,7 +189,7 @@
     <div class="error-text" id="joinError"></div>
     <button class="primary" id="checkCodeBtn">Continue</button>
   </div>
-
+​
   <!-- JOIN SECRET -->
   <div class="screen" id="screen-join-secret">
     <h1>Pick your secret</h1>
@@ -181,17 +201,17 @@
     <div class="error-text" id="joinSecretError"></div>
     <button class="primary" id="startDuelBtn">Start duel</button>
   </div>
-
+​
   <!-- DUEL PLAY -->
   <div class="screen" id="screen-duel">
     <h1>Number duel</h1>
     <div class="turn-row"><span class="turn-badge" id="turnBadge">Checking turn…</span></div>
-
+​
     <div class="range-row">
       <span id="lowBound">1</span>
       <span id="highBound">100</span>
     </div>
-
+​
     <div class="card">
       <div class="reading">
         <div class="number" id="numberDisplay">?</div>
@@ -199,25 +219,88 @@
       </div>
       <div class="tries" id="guessHistory"></div>
     </div>
-
+​
     <div class="guess-row" id="guessRow">
       <input type="number" id="guessInput" min="1" max="100" placeholder="Your guess" aria-label="Your guess">
       <button class="go" id="goBtn">Guess</button>
     </div>
-
+​
     <p class="copy-note" id="opponentNote"></p>
     <button class="ghost" id="newDuelBtn" style="display:none;">Start a new duel</button>
   </div>
-
+​
+  <!-- CODEBREAKER LANDING -->
+  <div class="screen" id="screen-cb-landing">
+    <span class="back-link" data-back="mode">&larr; back</span>
+    <h1>Crack the code</h1>
+    <p class="sub">The system picks a secret 4-digit code (no repeated digits). Take turns guessing — you'll see how many digits are right, and how many are in the exact spot.</p>
+    <div class="choice-row">
+      <button class="choice-btn" id="cbToHost"><span class="big">Start</span>Create a room</button>
+      <button class="choice-btn" id="cbToJoin"><span class="big">Join</span>Enter a code</button>
+    </div>
+  </div>
+​
+  <!-- CODEBREAKER HOST WAITING -->
+  <div class="screen" id="screen-cb-host-watch">
+    <h1>Share this code</h1>
+    <p class="sub">Send this code to your opponent. Once they join, you'll both start guessing the system's secret code.</p>
+    <div class="card">
+      <div class="code-display">
+        <div class="label">ROOM CODE</div>
+        <div class="code" id="cbHostCodeDisplay">0000</div>
+      </div>
+      <div class="status-line" id="cbHostWaitStatus">Waiting for your opponent to join…</div>
+    </div>
+  </div>
+​
+  <!-- CODEBREAKER JOIN -->
+  <div class="screen" id="screen-cb-join">
+    <span class="back-link" data-back="cbLanding">&larr; back</span>
+    <h1>Enter the room code</h1>
+    <p class="sub">Ask your opponent for the 4-digit room code they created.</p>
+    <div class="field">
+      <label for="cbCodeInput">Room code</label>
+      <input type="text" id="cbCodeInput" inputmode="numeric" maxlength="4" placeholder="e.g. 1234">
+    </div>
+    <div class="error-text" id="cbJoinError"></div>
+    <button class="primary" id="cbJoinBtn">Join room</button>
+  </div>
+​
+  <!-- CODEBREAKER PLAY -->
+  <div class="screen" id="screen-cb-play">
+    <h1>Crack the code</h1>
+    <div class="turn-row"><span class="turn-badge" id="cbTurnBadge">Checking turn…</span></div>
+​
+    <div class="card">
+      <div class="reading">
+        <div class="number" id="cbNumberDisplay">????</div>
+        <div class="feedback" id="cbFeedback">Waiting…</div>
+      </div>
+    </div>
+​
+    <div class="guess-row" id="cbGuessRow">
+      <input type="text" id="cbGuessInput" inputmode="numeric" maxlength="4" placeholder="4 different digits">
+      <button class="go" id="cbGoBtn">Guess</button>
+    </div>
+​
+    <div class="section-label">Your guesses</div>
+    <div id="cbMyHistory"></div>
+​
+    <div class="section-label">Opponent's guesses</div>
+    <div id="cbOppHistory"></div>
+​
+    <button class="ghost" id="cbNewGameBtn" style="display:none;">Start a new game</button>
+  </div>
+​
 </div>
-
+​
 <script>
 (function(){
   // ---- Fill these in with your own Supabase project values ----
   const SUPABASE_URL = 'https://uenyqkyuyxbbqehjzspk.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_FGT-Tw77u5BTy4zxbqwiHA_bmndBToE';
   // ---------------------------------------------------------------
-
+​
   if (!SUPABASE_URL.startsWith('http') || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY'){
     document.getElementById('app').innerHTML =
       '<div class="setup-missing"><strong>Setup needed.</strong><br><br>' +
@@ -226,53 +309,60 @@
       'Also run <code>supabase-schema.sql</code> in the Supabase SQL editor first.</div>';
     return;
   }
-
+​
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+​
   const LOW = 1, HIGH = 100;
   let currentCode = null;
   let myRole = null; // 'a' or 'b'
   let pollTimer = null;
-
+​
   const screens = {
-    landing: document.getElementById('screen-landing'),
+    mode: document.getElementById('screen-mode'),
+    duelLanding: document.getElementById('screen-duel-landing'),
     hostSetup: document.getElementById('screen-host-setup'),
     hostWatch: document.getElementById('screen-host-watch'),
     joinSetup: document.getElementById('screen-join-setup'),
     joinSecret: document.getElementById('screen-join-secret'),
     duel: document.getElementById('screen-duel'),
+    cbLanding: document.getElementById('screen-cb-landing'),
+    cbHostWatch: document.getElementById('screen-cb-host-watch'),
+    cbJoin: document.getElementById('screen-cb-join'),
+    cbPlay: document.getElementById('screen-cb-play'),
   };
-
+​
   function show(name){
     Object.values(screens).forEach(s => s.classList.remove('active'));
     screens[name].classList.add('active');
   }
-
+​
   document.querySelectorAll('[data-back]').forEach(el => {
     el.addEventListener('click', () => {
       stopPolling();
       show(el.getAttribute('data-back'));
     });
   });
-
+​
   document.getElementById('toHost').addEventListener('click', () => show('hostSetup'));
   document.getElementById('toJoin').addEventListener('click', () => show('joinSetup'));
-
+  document.getElementById('toDuelMode').addEventListener('click', () => show('duelLanding'));
+  document.getElementById('toCodebreakerMode').addEventListener('click', () => show('cbLanding'));
+​
   function randomCode(){
     return String(Math.floor(1000 + Math.random() * 9000));
   }
-
+​
   async function fetchState(code){
     const { data, error } = await supabase.from('duels').select('state').eq('code', code).maybeSingle();
     if (error || !data) return null;
     return data.state;
   }
-
+​
   async function insertGame(code, state){
     const { error } = await supabase.from('duels').insert({ code, state });
     return !error;
   }
-
+​
   async function updateGame(code, state){
     const { error } = await supabase
       .from('duels')
@@ -280,7 +370,7 @@
       .eq('code', code);
     return !error;
   }
-
+​
   async function generateUniqueCode(){
     let code = randomCode();
     let tries = 0;
@@ -290,14 +380,14 @@
     }
     return code;
   }
-
+​
   function stopPolling(){
     if (pollTimer){
       clearInterval(pollTimer);
       pollTimer = null;
     }
   }
-
+​
   function pollGame(code, onChange){
     stopPolling();
     pollTimer = setInterval(async () => {
@@ -305,14 +395,14 @@
       if (state) onChange(state);
     }, 2000);
   }
-
+​
   // ---------- HOST (player A) ----------
   const hostSecretInput = document.getElementById('hostSecretInput');
   const hostError = document.getElementById('hostError');
   const createGameBtn = document.getElementById('createGameBtn');
   const hostCodeDisplay = document.getElementById('hostCodeDisplay');
   const hostWaitStatus = document.getElementById('hostWaitStatus');
-
+​
   createGameBtn.addEventListener('click', async () => {
     const val = Number(hostSecretInput.value);
     if (!Number.isInteger(val) || val < LOW || val > HIGH){
@@ -322,9 +412,10 @@
     hostError.textContent = '';
     createGameBtn.disabled = true;
     createGameBtn.textContent = 'Creating…';
-
+​
     const code = await generateUniqueCode();
     const state = {
+      mode: 'duel',
       status: 'waiting_for_join',
       turn: 'a',
       winner: null,
@@ -334,18 +425,18 @@
     const ok = await insertGame(code, state);
     createGameBtn.disabled = false;
     createGameBtn.textContent = 'Create duel';
-
+​
     if (!ok){
       hostError.textContent = 'Could not create the game. Check your Supabase setup and try again.';
       return;
     }
-
+​
     currentCode = code;
     myRole = 'a';
     hostCodeDisplay.textContent = code;
     hostWaitStatus.textContent = 'Waiting for your opponent to join…';
     hostSecretInput.value = '';
-
+​
     show('hostWatch');
     pollGame(code, (newState) => {
       if (newState.status === 'playing' || newState.status === 'won'){
@@ -353,7 +444,7 @@
       }
     });
   });
-
+​
   // ---------- JOIN (player B) ----------
   const codeInput = document.getElementById('codeInput');
   const joinError = document.getElementById('joinError');
@@ -362,7 +453,7 @@
   const joinSecretError = document.getElementById('joinSecretError');
   const startDuelBtn = document.getElementById('startDuelBtn');
   let pendingCode = null;
-
+​
   checkCodeBtn.addEventListener('click', async () => {
     const code = codeInput.value.trim();
     if (!/^\d{4}$/.test(code)){
@@ -374,9 +465,13 @@
     const state = await fetchState(code);
     checkCodeBtn.disabled = false;
     checkCodeBtn.textContent = 'Continue';
-
+​
     if (!state){
       joinError.textContent = 'No game found with that code. Double-check it with your opponent.';
+      return;
+    }
+    if (state.mode && state.mode !== 'duel'){
+      joinError.textContent = 'That code belongs to a different game type.';
       return;
     }
     if (state.status !== 'waiting_for_join'){
@@ -387,7 +482,7 @@
     pendingCode = code;
     show('joinSecret');
   });
-
+​
   startDuelBtn.addEventListener('click', async () => {
     const val = Number(joinSecretInput.value);
     if (!Number.isInteger(val) || val < LOW || val > HIGH){
@@ -397,7 +492,7 @@
     joinSecretError.textContent = '';
     startDuelBtn.disabled = true;
     startDuelBtn.textContent = 'Starting…';
-
+​
     const state = await fetchState(pendingCode);
     if (!state || state.status !== 'waiting_for_join'){
       joinSecretError.textContent = 'This duel is no longer available.';
@@ -405,20 +500,20 @@
       startDuelBtn.textContent = 'Start duel';
       return;
     }
-
+​
     state.b.secret = val;
     state.status = 'playing';
     await updateGame(pendingCode, state);
-
+​
     currentCode = pendingCode;
     myRole = 'b';
     joinSecretInput.value = '';
     startDuelBtn.disabled = false;
     startDuelBtn.textContent = 'Start duel';
-
+​
     enterDuel(state);
   });
-
+​
   // ---------- DUEL PLAY ----------
   const turnBadge = document.getElementById('turnBadge');
   const lowBound = document.getElementById('lowBound');
@@ -431,23 +526,23 @@
   const goBtn = document.getElementById('goBtn');
   const opponentNote = document.getElementById('opponentNote');
   const newDuelBtn = document.getElementById('newDuelBtn');
-
+​
   function oppRole(r){ return r === 'a' ? 'b' : 'a'; }
-
+​
   function renderDuel(state){
     const mine = state[myRole];
     const opp = state[oppRole(myRole)];
-
+​
     lowBound.textContent = mine.low;
     highBound.textContent = mine.high;
-
+​
     guessHistory.innerHTML = '';
     mine.guesses.forEach(g => {
       const chip = document.createElement('span');
       chip.textContent = g.value;
       guessHistory.appendChild(chip);
     });
-
+​
     if (state.status === 'won'){
       stopPolling();
       guessRow.style.display = 'none';
@@ -466,10 +561,10 @@
       opponentNote.textContent = `Your secret was ${mine.secret}. Their secret was ${opp.secret}.`;
       return;
     }
-
+​
     newDuelBtn.style.display = 'none';
     opponentNote.textContent = `Opponent has made ${opp.guesses.length} ${opp.guesses.length === 1 ? 'guess' : 'guesses'} so far.`;
-
+​
     if (state.turn === myRole){
       guessRow.style.display = 'flex';
       turnBadge.textContent = 'Your turn';
@@ -490,33 +585,33 @@
       goBtn.disabled = true;
     }
   }
-
+​
   function enterDuel(state){
     show('duel');
     renderDuel(state);
     pollGame(currentCode, (newState) => renderDuel(newState));
   }
-
+​
   goBtn.addEventListener('click', async () => {
     if (!currentCode || !myRole) return;
     const raw = guessInput.value.trim();
     if (raw === '') return;
     const g = Number(raw);
-
+​
     const state = await fetchState(currentCode);
     if (!state || state.status !== 'playing' || state.turn !== myRole) {
       if (state) renderDuel(state);
       return;
     }
-
+​
     const mine = state[myRole];
     const opp = state[oppRole(myRole)];
-
+​
     if (!Number.isInteger(g) || g < mine.low || g > mine.high){
       feedback.textContent = `Enter a whole number between ${mine.low} and ${mine.high}`;
       return;
     }
-
+​
     let result;
     if (g === opp.secret){
       result = 'win';
@@ -530,28 +625,260 @@
       mine.high = Math.min(mine.high, g - 1);
     }
     mine.guesses.push({ value: g, result: result });
-
+​
     if (state.status !== 'won'){
       state.turn = oppRole(myRole);
     }
-
+​
     guessInput.value = '';
     await updateGame(currentCode, state);
     renderDuel(state);
   });
-
+​
   guessInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') goBtn.click();
   });
-
+​
   newDuelBtn.addEventListener('click', () => {
     stopPolling();
     currentCode = null;
     myRole = null;
     codeInput.value = '';
-    show('landing');
+    show('mode');
   });
-
+​
+  // ================== CODEBREAKER MODE ==================
+  const cbToHostBtn = document.getElementById('cbToHost');
+  const cbToJoinBtn = document.getElementById('cbToJoin');
+  const cbHostCodeDisplay = document.getElementById('cbHostCodeDisplay');
+  const cbHostWaitStatus = document.getElementById('cbHostWaitStatus');
+  const cbCodeInput = document.getElementById('cbCodeInput');
+  const cbJoinError = document.getElementById('cbJoinError');
+  const cbJoinBtn = document.getElementById('cbJoinBtn');
+  const cbTurnBadge = document.getElementById('cbTurnBadge');
+  const cbNumberDisplay = document.getElementById('cbNumberDisplay');
+  const cbFeedback = document.getElementById('cbFeedback');
+  const cbGuessRow = document.getElementById('cbGuessRow');
+  const cbGuessInput = document.getElementById('cbGuessInput');
+  const cbGoBtn = document.getElementById('cbGoBtn');
+  const cbMyHistory = document.getElementById('cbMyHistory');
+  const cbOppHistory = document.getElementById('cbOppHistory');
+  const cbNewGameBtn = document.getElementById('cbNewGameBtn');
+​
+  function generateSecretCode(){
+    const digits = ['0','1','2','3','4','5','6','7','8','9'];
+    for (let i = digits.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [digits[i], digits[j]] = [digits[j], digits[i]];
+    }
+    return digits.slice(0, 4).join('');
+  }
+​
+  function scoreGuess(guess, secret){
+    let bulls = 0;
+    for (let i = 0; i < 4; i++){
+      if (guess[i] === secret[i]) bulls++;
+    }
+    let cows = 0;
+    for (let i = 0; i < 4; i++){
+      if (guess[i] !== secret[i] && secret.includes(guess[i])) cows++;
+    }
+    return { bulls, cows };
+  }
+​
+  cbToHostBtn.addEventListener('click', async () => {
+    cbToHostBtn.disabled = true;
+    const code = await generateUniqueCode();
+    const state = {
+      mode: 'codebreaker',
+      status: 'waiting_for_join',
+      turn: 'a',
+      winner: null,
+      secret: generateSecretCode(),
+      a: { guesses: [] },
+      b: { guesses: [] }
+    };
+    const ok = await insertGame(code, state);
+    cbToHostBtn.disabled = false;
+​
+    if (!ok){
+      alert('Could not create the room. Check your Supabase setup and try again.');
+      return;
+    }
+​
+    currentCode = code;
+    myRole = 'a';
+    cbHostCodeDisplay.textContent = code;
+    cbHostWaitStatus.textContent = 'Waiting for your opponent to join…';
+​
+    show('cbHostWatch');
+    pollGame(code, (newState) => {
+      if (newState.status === 'playing' || newState.status === 'won'){
+        enterCodebreaker(newState);
+      }
+    });
+  });
+​
+  cbToJoinBtn.addEventListener('click', () => show('cbJoin'));
+​
+  cbJoinBtn.addEventListener('click', async () => {
+    const code = cbCodeInput.value.trim();
+    if (!/^\d{4}$/.test(code)){
+      cbJoinError.textContent = 'Enter the 4-digit code exactly as shared';
+      return;
+    }
+    cbJoinBtn.disabled = true;
+    cbJoinBtn.textContent = 'Joining…';
+    const state = await fetchState(code);
+    cbJoinBtn.disabled = false;
+    cbJoinBtn.textContent = 'Join room';
+​
+    if (!state){
+      cbJoinError.textContent = 'No room found with that code. Double-check it with your opponent.';
+      return;
+    }
+    if (state.mode !== 'codebreaker'){
+      cbJoinError.textContent = 'That code belongs to a different game type.';
+      return;
+    }
+    if (state.status !== 'waiting_for_join'){
+      cbJoinError.textContent = 'This room already has two players.';
+      return;
+    }
+​
+    cbJoinError.textContent = '';
+    state.status = 'playing';
+    await updateGame(code, state);
+​
+    currentCode = code;
+    myRole = 'b';
+    cbCodeInput.value = '';
+    enterCodebreaker(state);
+  });
+​
+  function renderGuessList(container, guesses){
+    container.innerHTML = '';
+    if (!guesses.length){
+      const empty = document.createElement('div');
+      empty.className = 'cb-empty';
+      empty.textContent = 'No guesses yet';
+      container.appendChild(empty);
+      return;
+    }
+    guesses.forEach(g => {
+      const row = document.createElement('div');
+      row.className = 'cb-guess-row';
+      const codeSpan = document.createElement('span');
+      codeSpan.className = 'code';
+      codeSpan.textContent = g.value;
+      const fbSpan = document.createElement('span');
+      fbSpan.className = 'fb';
+      fbSpan.textContent = `${g.bulls} right spot · ${g.cows} right digit`;
+      row.appendChild(codeSpan);
+      row.appendChild(fbSpan);
+      container.appendChild(row);
+    });
+  }
+​
+  function renderCodebreaker(state){
+    const mine = state[myRole];
+    const opp = state[oppRole(myRole)];
+​
+    renderGuessList(cbMyHistory, mine.guesses);
+    renderGuessList(cbOppHistory, opp.guesses);
+​
+    if (state.status === 'won'){
+      stopPolling();
+      cbGuessRow.style.display = 'none';
+      cbNewGameBtn.style.display = 'block';
+      cbTurnBadge.textContent = 'Game over';
+      cbTurnBadge.className = 'turn-badge';
+      cbNumberDisplay.textContent = state.secret;
+      if (state.winner === myRole){
+        cbNumberDisplay.className = 'number win';
+        cbFeedback.textContent = `You cracked it in ${mine.guesses.length} guesses! \uD83C\uDF89`;
+      } else {
+        cbNumberDisplay.className = 'number lose';
+        cbFeedback.textContent = 'Your opponent cracked the code first.';
+      }
+      return;
+    }
+​
+    cbNewGameBtn.style.display = 'none';
+    cbGuessRow.style.display = 'flex';
+​
+    const lastMine = mine.guesses.length ? mine.guesses[mine.guesses.length - 1] : null;
+    cbNumberDisplay.textContent = lastMine ? lastMine.value : '????';
+    cbNumberDisplay.className = 'number';
+​
+    if (state.turn === myRole){
+      cbTurnBadge.textContent = 'Your turn';
+      cbTurnBadge.className = 'turn-badge mine';
+      cbFeedback.textContent = lastMine
+        ? `Last guess: ${lastMine.bulls} right spot, ${lastMine.cows} right digit`
+        : 'Make your first guess';
+      cbGuessInput.disabled = false;
+      cbGoBtn.disabled = false;
+    } else {
+      cbTurnBadge.textContent = "Opponent's turn";
+      cbTurnBadge.className = 'turn-badge';
+      cbFeedback.textContent = 'Waiting for your opponent to guess…';
+      cbGuessInput.disabled = true;
+      cbGoBtn.disabled = true;
+    }
+  }
+​
+  function enterCodebreaker(state){
+    show('cbPlay');
+    renderCodebreaker(state);
+    pollGame(currentCode, (newState) => renderCodebreaker(newState));
+  }
+​
+  cbGoBtn.addEventListener('click', async () => {
+    if (!currentCode || !myRole) return;
+    const raw = cbGuessInput.value.trim();
+    if (!/^\d{4}$/.test(raw)){
+      cbFeedback.textContent = 'Enter exactly 4 digits';
+      return;
+    }
+    if (new Set(raw.split('')).size !== 4){
+      cbFeedback.textContent = 'Use 4 different digits';
+      return;
+    }
+​
+    const state = await fetchState(currentCode);
+    if (!state || state.status !== 'playing' || state.turn !== myRole){
+      if (state) renderCodebreaker(state);
+      return;
+    }
+​
+    const { bulls, cows } = scoreGuess(raw, state.secret);
+    state[myRole].guesses.push({ value: raw, bulls, cows });
+​
+    if (bulls === 4){
+      state.status = 'won';
+      state.winner = myRole;
+    } else {
+      state.turn = oppRole(myRole);
+    }
+​
+    cbGuessInput.value = '';
+    await updateGame(currentCode, state);
+    renderCodebreaker(state);
+  });
+​
+  cbGuessInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') cbGoBtn.click();
+  });
+​
+  cbNewGameBtn.addEventListener('click', () => {
+    stopPolling();
+    currentCode = null;
+    myRole = null;
+    cbCodeInput.value = '';
+    show('mode');
+  });
+​
 })();
 </script>
 </body>
