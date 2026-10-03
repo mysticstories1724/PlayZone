@@ -450,7 +450,6 @@ window.addEventListener('error', function(e){
     const ok = await insertGame(code, state);
     createGameBtn.disabled = false;
     createGameBtn.textContent = 'Create duel';
-​
     if (!ok){
       hostError.textContent = 'Could not create the game. Check your Supabase setup and try again.';
       return;
