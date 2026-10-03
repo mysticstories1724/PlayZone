@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Duel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --ink: #1b1a2e;
+    --paper: #f6f3ec;
+    --dial: #2e2b4a;
+    --warm: #e2763a;
+    --cool: #3b7a8a;
+    --win: #2f8f5b;
+    --lose: #b0493f;
+    --line: rgba(27,26,46,0.14);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink);
+    font-family: 'IBM Plex Mono', monospace;
+    display: flex; align-items: flex-start; justify-content: center; padding: 32px 16px;
+  }
+  .stage { width: 100%; max-width: 440px; }
+  h1 {
+    font-family: 'Fraunces', serif; font-weight: 700;
+    font-size: clamp(1.8rem, 6vw, 2.4rem); line-height: 1.05;
+    margin: 0 0 6px; letter-spacing: -0.01em;
+  }
+  .sub { font-size: 0.88rem; color: #5c5a72; margin: 0 0 24px; max-width: 36ch; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .card {
+    background: var(--dial); border-radius: 18px; padding: 28px 22px;
+    position: relative; overflow: hidden;
+  }
+  .card::before{
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% -10%, rgba(255,255,255,0.08), transparent 60%);
+    pointer-events: none;
+  }
+  .choice-row { display: flex; gap: 12px; margin-top: 4px; }
+  .choice-btn {
+    flex: 1; font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem; font-weight: 500;
+    padding: 20px 12px; border: 2px solid var(--ink); border-radius: 12px;
+    background: transparent; color: var(--ink); cursor: pointer; text-align: center;
+  }
+  .choice-btn .big { display: block; font-family: 'Fraunces', serif; font-size: 1.5rem; margin-bottom: 4px; }
+  .choice-btn:hover { background: var(--ink); color: var(--paper); }
+  label { display: block; font-size: 0.78rem; color: #8a8798; margin-bottom: 6px; }
+  input[type="number"], input[type="text"] {
+    font-family: 'IBM Plex Mono', monospace; font-size: 1rem; padding: 14px;
+    border: 2px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); width: 100%;
+  }
+  input:focus { outline: none; border-color: var(--ink); }
+  .field { margin-bottom: 14px; }
+  button.primary {
+    width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem; font-weight: 500;
+    padding: 15px 10px; border: 2px solid var(--ink); border-radius: 10px;
+    background: var(--ink); color: var(--paper); cursor: pointer; margin-top: 4px;
+  }
+  button.primary:hover { background: #000; }
+  button.primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.ghost {
+    width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; padding: 10px;
+    border: none; background: none; color: #8a8798; text-decoration: underline; cursor: pointer; margin-top: 10px;
+  }
+  .code-display { text-align: center; margin: 18px 0; position: relative; z-index: 1; }
+  .code-display .label { font-size: 0.75rem; color: #9d9ab0; margin-bottom: 6px; }
+  .code-display .code {
+    font-family: 'Fraunces', serif; font-weight: 700; font-size: 3rem;
+    letter-spacing: 0.08em; color: var(--paper);
+  }
+  .status-line {
+    text-align: center; color: #c9c6d8; font-size: 0.92rem;
+    position: relative; z-index: 1; min-height: 1.4em; margin-bottom: 4px;
+  }
+  .turn-badge {
+    display: inline-block; text-align: center; font-size: 0.78rem; padding: 5px 14px; border-radius: 999px;
+    background: rgba(246,243,236,0.1); color: var(--paper); position: relative; z-index: 1; margin: 0 auto 14px;
+  }
+  .turn-badge.mine { background: var(--warm); color: #fff; }
+  .turn-row { text-align: center; }
+  .reading { text-align: center; position: relative; z-index: 1; }
+  .number {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(3.2rem, 18vw, 4.4rem);
+    color: var(--paper); line-height: 1; letter-spacing: -0.02em; transition: color 0.25s ease;
+  }
+  .number.warm { color: var(--warm); }
+  .number.cool { color: var(--cool); }
+  .number.win { color: var(--win); }
+  .number.lose { color: var(--lose); }
+  .feedback { min-height: 1.4em; margin-top: 10px; font-size: 0.95rem; color: #c9c6d8; }
+  .range-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.78rem; color: #8a8798; margin-bottom: 8px; padding: 0 2px;
+  }
+  .tries { position: relative; z-index: 1; margin-top: 16px; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .tries span { font-size: 0.72rem; padding: 3px 8px; border-radius: 999px; background: rgba(246,243,236,0.08); color: #9d9ab0; }
+  .guess-row { margin-top: 14px; display: flex; gap: 10px; }
+  .guess-row input { flex: 1; }
+  .go {
+    width: 88px; flex: none; border-radius: 10px; border: 2px solid var(--ink);
+    background: var(--ink); color: var(--paper); font-family: 'IBM Plex Mono', monospace; cursor: pointer;
+  }
+  .go:hover { background: #000; }
+  .go:disabled { opacity: 0.4; cursor: not-allowed; }
+  .copy-note { font-size: 0.78rem; color: #8a8798; margin-top: 16px; text-align: center; line-height: 1.5; }
+  .back-link { font-size: 0.78rem; color: #8a8798; text-decoration: underline; cursor: pointer; display: inline-block; margin-bottom: 14px; }
+  .error-text { color: var(--warm); font-size: 0.82rem; margin-top: -4px; margin-bottom: 12px; min-height: 1.2em; }
+  .setup-missing {
+    max-width: 440px; padding: 24px; border: 2px solid var(--ink); border-radius: 14px;
+    font-size: 0.88rem; line-height: 1.6;
+  }
+  .setup-missing code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="stage" id="app">
+
+  <!-- LANDING -->
+  <div class="screen active" id="screen-landing">
+    <h1>Number duel</h1>
+    <p class="sub">Each player picks a secret number from 1 to 100, then you take turns guessing each other's. First to crack it wins.</p>
+    <div class="choice-row">
+      <button class="choice-btn" id="toHost"><span class="big">Start</span>Create a duel</button>
+      <button class="choice-btn" id="toJoin"><span class="big">Join</span>Enter a code</button>
+    </div>
+  </div>
+
+  <!-- HOST SETUP -->
+  <div class="screen" id="screen-host-setup">
+    <span class="back-link" data-back="landing">&larr; back</span>
+    <h1>Pick your secret</h1>
+    <p class="sub">Choose a whole number from 1 to 100. Your opponent will only get higher / lower hints.</p>
+    <div class="field">
+      <label for="hostSecretInput">Your secret number (1–100)</label>
+      <input type="number" id="hostSecretInput" min="1" max="100" placeholder="e.g. 42">
+    </div>
+    <div class="error-text" id="hostError"></div>
+    <button class="primary" id="createGameBtn">Create duel</button>
+  </div>
+
+  <!-- HOST WAITING -->
+  <div class="screen" id="screen-host-watch">
+    <h1>Share this code</h1>
+    <p class="sub">Send this code to your opponent. Once they join and set their own secret, the duel begins automatically.</p>
+    <div class="card">
+      <div class="code-display">
+        <div class="label">GAME CODE</div>
+        <div class="code" id="hostCodeDisplay">0000</div>
+      </div>
+      <div class="status-line" id="hostWaitStatus">Waiting for your opponent to join…</div>
+    </div>
+  </div>
+
+  <!-- JOIN SETUP -->
+  <div class="screen" id="screen-join-setup">
+    <span class="back-link" data-back="landing">&larr; back</span>
+    <h1>Enter the code</h1>
+    <p class="sub">Ask your opponent for the 4-digit duel code they created.</p>
+    <div class="field">
+      <label for="codeInput">Duel code</label>
+      <input type="text" id="codeInput" inputmode="numeric" maxlength="4" placeholder="e.g. 1234">
+    </div>
+    <div class="error-text" id="joinError"></div>
+    <button class="primary" id="checkCodeBtn">Continue</button>
+  </div>
+
+  <!-- JOIN SECRET -->
+  <div class="screen" id="screen-join-secret">
+    <h1>Pick your secret</h1>
+    <p class="sub">Choose your own secret number from 1 to 100. Your opponent will try to guess it too.</p>
+    <div class="field">
+      <label for="joinSecretInput">Your secret number (1–100)</label>
+      <input type="number" id="joinSecretInput" min="1" max="100" placeholder="e.g. 17">
+    </div>
+    <div class="error-text" id="joinSecretError"></div>
+    <button class="primary" id="startDuelBtn">Start duel</button>
+  </div>
+
+  <!-- DUEL PLAY -->
+  <div class="screen" id="screen-duel">
+    <h1>Number duel</h1>
+    <div class="turn-row"><span class="turn-badge" id="turnBadge">Checking turn…</span></div>
+
+    <div class="range-row">
+      <span id="lowBound">1</span>
+      <span id="highBound">100</span>
+    </div>
+
+    <div class="card">
+      <div class="reading">
+        <div class="number" id="numberDisplay">?</div>
+        <div class="feedback" id="feedback">Waiting…</div>
+      </div>
+      <div class="tries" id="guessHistory"></div>
+    </div>
+
+    <div class="guess-row" id="guessRow">
+      <input type="number" id="guessInput" min="1" max="100" placeholder="Your guess" aria-label="Your guess">
+      <button class="go" id="goBtn">Guess</button>
+    </div>
+
+    <p class="copy-note" id="opponentNote"></p>
+    <button class="ghost" id="newDuelBtn" style="display:none;">Start a new duel</button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // ---- Fill these in with your own Supabase project values ----
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  // ---------------------------------------------------------------
+
+  if (!SUPABASE_URL.startsWith('http') || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY'){
+    document.getElementById('app').innerHTML =
+      '<div class="setup-missing"><strong>Setup needed.</strong><br><br>' +
+      'Open this file and replace <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> near the top of the ' +
+      '&lt;script&gt; tag with the values from your Supabase project (Settings &rarr; API). ' +
+      'Also run <code>supabase-schema.sql</code> in the Supabase SQL editor first.</div>';
+    return;
+  }
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const LOW = 1, HIGH = 100;
+  let currentCode = null;
+  let myRole = null; // 'a' or 'b'
+  let channel = null;
+
+  const screens = {
+    landing: document.getElementById('screen-landing'),
+    hostSetup: document.getElementById('screen-host-setup'),
+    hostWatch: document.getElementById('screen-host-watch'),
+    joinSetup: document.getElementById('screen-join-setup'),
+    joinSecret: document.getElementById('screen-join-secret'),
+    duel: document.getElementById('screen-duel'),
+  };
+
+  function show(name){
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  document.querySelectorAll('[data-back]').forEach(el => {
+    el.addEventListener('click', () => {
+      unsubscribe();
+      show(el.getAttribute('data-back'));
+    });
+  });
+
+  document.getElementById('toHost').addEventListener('click', () => show('hostSetup'));
+  document.getElementById('toJoin').addEventListener('click', () => show('joinSetup'));
+
+  function randomCode(){
+    return String(Math.floor(1000 + Math.random() * 9000));
+  }
+
+  async function fetchState(code){
+    const { data, error } = await supabase.from('duels').select('state').eq('code', code).maybeSingle();
+    if (error || !data) return null;
+    return data.state;
+  }
+
+  async function insertGame(code, state){
+    const { error } = await supabase.from('duels').insert({ code, state });
+    return !error;
+  }
+
+  async function updateGame(code, state){
+    const { error } = await supabase
+      .from('duels')
+      .update({ state, updated_at: new Date().toISOString() })
+      .eq('code', code);
+    return !error;
+  }
+
+  async function generateUniqueCode(){
+    let code = randomCode();
+    let tries = 0;
+    while ((await fetchState(code)) && tries < 15){
+      code = randomCode();
+      tries++;
+    }
+    return code;
+  }
+
+  function unsubscribe(){
+    if (channel){
+      supabase.removeChannel(channel);
+      channel = null;
+    }
+  }
+
+  function subscribeToGame(code, onChange){
+    unsubscribe();
+    channel = supabase
+      .channel('duel-' + code)
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'duels', filter: `code=eq.${code}` },
+        (payload) => onChange(payload.new.state)
+      )
+      .subscribe();
+  }
+
+  // ---------- HOST (player A) ----------
+  const hostSecretInput = document.getElementById('hostSecretInput');
+  const hostError = document.getElementById('hostError');
+  const createGameBtn = document.getElementById('createGameBtn');
+  const hostCodeDisplay = document.getElementById('hostCodeDisplay');
+  const hostWaitStatus = document.getElementById('hostWaitStatus');
+
+  createGameBtn.addEventListener('click', async () => {
+    const val = Number(hostSecretInput.value);
+    if (!Number.isInteger(val) || val < LOW || val > HIGH){
+      hostError.textContent = `Pick a whole number between ${LOW} and ${HIGH}`;
+      return;
+    }
+    hostError.textContent = '';
+    createGameBtn.disabled = true;
+    createGameBtn.textContent = 'Creating…';
+
+    const code = await generateUniqueCode();
+    const state = {
+      status: 'waiting_for_join',
+      turn: 'a',
+      winner: null,
+      a: { secret: val, low: LOW, high: HIGH, guesses: [] },
+      b: { secret: null, low: LOW, high: HIGH, guesses: [] }
+    };
+    const ok = await insertGame(code, state);
+    createGameBtn.disabled = false;
+    createGameBtn.textContent = 'Create duel';
+
+    if (!ok){
+      hostError.textContent = 'Could not create the game. Check your Supabase setup and try again.';
+      return;
+    }
+
+    currentCode = code;
+    myRole = 'a';
+    hostCodeDisplay.textContent = code;
+    hostWaitStatus.textContent = 'Waiting for your opponent to join…';
+    hostSecretInput.value = '';
+
+    show('hostWatch');
+    subscribeToGame(code, (newState) => {
+      if (newState.status === 'playing' || newState.status === 'won'){
+        enterDuel(newState);
+      }
+    });
+  });
+
+  // ---------- JOIN (player B) ----------
+  const codeInput = document.getElementById('codeInput');
+  const joinError = document.getElementById('joinError');
+  const checkCodeBtn = document.getElementById('checkCodeBtn');
+  const joinSecretInput = document.getElementById('joinSecretInput');
+  const joinSecretError = document.getElementById('joinSecretError');
+  const startDuelBtn = document.getElementById('startDuelBtn');
+  let pendingCode = null;
+
+  checkCodeBtn.addEventListener('click', async () => {
+    const code = codeInput.value.trim();
+    if (!/^\d{4}$/.test(code)){
+      joinError.textContent = 'Enter the 4-digit code exactly as shared';
+      return;
+    }
+    checkCodeBtn.disabled = true;
+    checkCodeBtn.textContent = 'Checking…';
+    const state = await fetchState(code);
+    checkCodeBtn.disabled = false;
+    checkCodeBtn.textContent = 'Continue';
+
+    if (!state){
+      joinError.textContent = 'No game found with that code. Double-check it with your opponent.';
+      return;
+    }
+    if (state.status !== 'waiting_for_join'){
+      joinError.textContent = 'This duel already has two players.';
+      return;
+    }
+    joinError.textContent = '';
+    pendingCode = code;
+    show('joinSecret');
+  });
+
+  startDuelBtn.addEventListener('click', async () => {
+    const val = Number(joinSecretInput.value);
+    if (!Number.isInteger(val) || val < LOW || val > HIGH){
+      joinSecretError.textContent = `Pick a whole number between ${LOW} and ${HIGH}`;
+      return;
+    }
+    joinSecretError.textContent = '';
+    startDuelBtn.disabled = true;
+    startDuelBtn.textContent = 'Starting…';
+
+    const state = await fetchState(pendingCode);
+    if (!state || state.status !== 'waiting_for_join'){
+      joinSecretError.textContent = 'This duel is no longer available.';
+      startDuelBtn.disabled = false;
+      startDuelBtn.textContent = 'Start duel';
+      return;
+    }
+
+    state.b.secret = val;
+    state.status = 'playing';
+    await updateGame(pendingCode, state);
+
+    currentCode = pendingCode;
+    myRole = 'b';
+    joinSecretInput.value = '';
+    startDuelBtn.disabled = false;
+    startDuelBtn.textContent = 'Start duel';
+
+    enterDuel(state);
+  });
+
+  // ---------- DUEL PLAY ----------
+  const turnBadge = document.getElementById('turnBadge');
+  const lowBound = document.getElementById('lowBound');
+  const highBound = document.getElementById('highBound');
+  const numberDisplay = document.getElementById('numberDisplay');
+  const feedback = document.getElementById('feedback');
+  const guessHistory = document.getElementById('guessHistory');
+  const guessRow = document.getElementById('guessRow');
+  const guessInput = document.getElementById('guessInput');
+  const goBtn = document.getElementById('goBtn');
+  const opponentNote = document.getElementById('opponentNote');
+  const newDuelBtn = document.getElementById('newDuelBtn');
+
+  function oppRole(r){ return r === 'a' ? 'b' : 'a'; }
+
+  function renderDuel(state){
+    const mine = state[myRole];
+    const opp = state[oppRole(myRole)];
+
+    lowBound.textContent = mine.low;
+    highBound.textContent = mine.high;
+
+    guessHistory.innerHTML = '';
+    mine.guesses.forEach(g => {
+      const chip = document.createElement('span');
+      chip.textContent = g.value;
+      guessHistory.appendChild(chip);
+    });
+
+    if (state.status === 'won'){
+      unsubscribe();
+      guessRow.style.display = 'none';
+      newDuelBtn.style.display = 'block';
+      turnBadge.textContent = 'Duel over';
+      turnBadge.className = 'turn-badge';
+      if (state.winner === myRole){
+        numberDisplay.textContent = opp.secret;
+        numberDisplay.className = 'number win';
+        feedback.textContent = `You guessed it in ${mine.guesses.length} guesses! \uD83C\uDF89`;
+      } else {
+        numberDisplay.textContent = mine.secret;
+        numberDisplay.className = 'number lose';
+        feedback.textContent = 'Your opponent guessed your number first.';
+      }
+      opponentNote.textContent = `Your secret was ${mine.secret}. Their secret was ${opp.secret}.`;
+      return;
+    }
+
+    newDuelBtn.style.display = 'none';
+    opponentNote.textContent = `Opponent has made ${opp.guesses.length} ${opp.guesses.length === 1 ? 'guess' : 'guesses'} so far.`;
+
+    if (state.turn === myRole){
+      guessRow.style.display = 'flex';
+      turnBadge.textContent = 'Your turn';
+      turnBadge.className = 'turn-badge mine';
+      numberDisplay.textContent = mine.guesses.length ? mine.guesses[mine.guesses.length - 1].value : '?';
+      numberDisplay.className = 'number';
+      feedback.textContent = mine.guesses.length ? 'Go on, take your next shot' : 'Make your first guess';
+      guessInput.disabled = false;
+      goBtn.disabled = false;
+    } else {
+      guessRow.style.display = 'flex';
+      turnBadge.textContent = "Opponent's turn";
+      turnBadge.className = 'turn-badge';
+      numberDisplay.textContent = mine.guesses.length ? mine.guesses[mine.guesses.length - 1].value : '?';
+      numberDisplay.className = 'number';
+      feedback.textContent = 'Waiting for your opponent to guess…';
+      guessInput.disabled = true;
+      goBtn.disabled = true;
+    }
+  }
+
+  function enterDuel(state){
+    show('duel');
+    renderDuel(state);
+    subscribeToGame(currentCode, (newState) => renderDuel(newState));
+  }
+
+  goBtn.addEventListener('click', async () => {
+    if (!currentCode || !myRole) return;
+    const raw = guessInput.value.trim();
+    if (raw === '') return;
+    const g = Number(raw);
+
+    const state = await fetchState(currentCode);
+    if (!state || state.status !== 'playing' || state.turn !== myRole) {
+      if (state) renderDuel(state);
+      return;
+    }
+
+    const mine = state[myRole];
+    const opp = state[oppRole(myRole)];
+
+    if (!Number.isInteger(g) || g < mine.low || g > mine.high){
+      feedback.textContent = `Enter a whole number between ${mine.low} and ${mine.high}`;
+      return;
+    }
+
+    let result;
+    if (g === opp.secret){
+      result = 'win';
+      state.status = 'won';
+      state.winner = myRole;
+    } else if (g < opp.secret){
+      result = 'higher';
+      mine.low = Math.max(mine.low, g + 1);
+    } else {
+      result = 'lower';
+      mine.high = Math.min(mine.high, g - 1);
+    }
+    mine.guesses.push({ value: g, result: result });
+
+    if (state.status !== 'won'){
+      state.turn = oppRole(myRole);
+    }
+
+    guessInput.value = '';
+    await updateGame(currentCode, state);
+    renderDuel(state);
+  });
+
+  guessInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') goBtn.click();
+  });
+
+  newDuelBtn.addEventListener('click', () => {
+    unsubscribe();
+    currentCode = null;
+    myRole = null;
+    codeInput.value = '';
+    show('landing');
+  });
+
+})();
+</script>
+</body>
+</html>
